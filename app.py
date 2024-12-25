@@ -21,6 +21,7 @@ limiter = Limiter(key_func=get_remote_address)
 limiter.init_app(app)
 
 DATABASE = '/data/users.db'
+os.makedirs('/data', exist_ok=True)  # Create the directory if it doesn't exist
 
 def init_db():
     db = get_db()
