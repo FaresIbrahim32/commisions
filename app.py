@@ -19,7 +19,7 @@ bcrypt = Bcrypt(app)
 limiter = Limiter(key_func=get_remote_address)
 limiter.init_app(app)
 
-DATABASE = 'users.db'
+DATABASE = '/data/users.db'
 
 def init_db():
     db = get_db()
