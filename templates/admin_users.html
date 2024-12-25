@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin User Management</title>
+</head>
+<body>
+    <h1>Manage Users</h1>
+    
+    {% for user in users %}
+        <div>
+            <p>Name: {{ user['name'] }}</p>
+            <p>Email: {{ user['email'] }}</p>
+            <p>Phone: {{ user['phone'] }}</p>
+            <p>Approved: {{ 'Yes' if user['approved'] else 'No' }}</p>
+            
+            {% if not user['username'] %}
+                <form method="post" action="{{ url_for('approve_account', user_id=user['id']) }}">
+                    <label for="username">Assign Username:</label>
+                    <input type="text" name="username" required>
+                    <button type="submit">Approve and Assign Username</button>
+                </form>
+            {% else %}
+                <p>Username: {{ user['username'] }}</p>
+            {% endif %}
+        </div>
+    {% endfor %}
+</body>
+</html>

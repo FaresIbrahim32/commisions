@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Employee Home - Upload PDF</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 300px;
+        }
+        h1 {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        .btn-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            color: #ffffff;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            text-decoration: none;
+        }
+        .btn-upload {
+            background-color: #60a82c;
+        }
+        .btn-view {
+            background-color: #007bff;
+        }
+        .btn-logout {
+            background-color: #dc3545;
+        }
+        .btn:hover {
+            opacity: 0.85;
+        }
+        .upload-form {
+            margin-top: 20px;
+        }
+        input[type="file"] {
+            display: none;
+        }
+        label {
+            cursor: pointer;
+            color: #ffffff;
+            background-color: #60a82c;
+            padding: 10px 20px;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        label:hover {
+            background-color: #4e8725;
+        }
+        .filename {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #333;
+        }
+    </style>
+    <script>
+        function showFilename() {
+            const fileInput = document.getElementById('pdf');
+            const fileLabel = document.getElementById('fileLabel');
+            const filenameDisplay = document.getElementById('filenameDisplay');
+            
+            // Display the file name in the label or below the label
+            if (fileInput.files.length > 0) {
+                fileLabel.textContent = fileInput.files[0].name;  // Option 1: replace the label text
+                // filenameDisplay.textContent = fileInput.files[0].name;  // Option 2: show it below the label
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="btn-container">
+            <!-- View Stored Receipts Button -->
+            <a href="{{ url_for('view_receipts') }}" class="btn btn-view">View Stored Receipts</a>
+            
+            <!-- Upload PDF Form -->
+            <form action="{{ url_for('upload_pdf') }}" method="POST" enctype="multipart/form-data" class="upload-form">
+                <input type="file" name="pdf" id="pdf" accept=".pdf" required onchange="showFilename()">
+                <label for="pdf" id="fileLabel">Upload PDF</label>
+                <!-- Uncomment the next line if you prefer the filename to be shown below the button instead -->
+                <!-- <div id="filenameDisplay" class="filename"></div> -->
+                <button type="submit" class="btn btn-upload">Submit</button>
+            </form>
+            
+            <!-- Logout Button -->
+            <a href="{{ url_for('logout') }}" class="btn btn-logout">Logout</a>
+        </div>
+    </div>
+</body>
+</html>
+ 

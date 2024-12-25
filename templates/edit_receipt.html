@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Receipt</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            text-align: center;
+        }
+        .form-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #f8f8f8;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        label, input {
+            display: block;
+            width: 100%;
+            margin: 8px 0;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Edit Receipt</h1>
+    <div class="form-container">
+        <form method="POST">
+            <label>Company Name</label>
+            <input type="text" name="company_name" value="{{ receipt[1] }}" required>
+
+            <label>Customer</label>
+            <input type="text" name="customer" value="{{ receipt[2] }}" required>
+
+            <label>Order Date</label>
+            <input type="text" name="order_date" value="{{ receipt[3] }}" required>
+
+            <label>Sales Person</label>
+            <input type="text" name="sales_person" value="{{ receipt[4] }}" required>
+
+            <label>Invoice Number</label>
+            <input type="text" name="rq_invoice" value="{{ receipt[5] }}" required>
+
+            <label>Total Price</label>
+            <input type="number" step="0.01" name="total_price" value="{{ receipt[6] }}" required>
+
+            <label>Accessory Prices (comma-separated)</label>
+            <input type="text" name="accessory_prices" value="{{ receipt[7] }}" required>
+
+            <label>Upgrades Count</label>
+            <input type="number" name="upgrades_count" value="{{ receipt[8] }}" required>
+
+            <label>Activations Count</label>
+            <input type="number" name="activations_count" value="{{ receipt[9] }}" required>
+
+            <label>PPP Present</label>
+            <input type="checkbox" name="ppp_present" {% if receipt[10] %}checked{% endif %}>
+
+            <label>Activation Fee Sum</label>
+            <input type="number" step="0.01" name="activation_fee_sum" value="{{ receipt[11] }}" required>
+
+            <button type="submit">Save Changes</button>
+        </form>
+    </div>
+</body>
+</html>

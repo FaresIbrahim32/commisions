@@ -1,0 +1,32 @@
+# Flask project specific files
+__pycache__
+*.pyc
+*.env
+
+# Database file
+users.db
+
+# Text editor temporary files (adjust based on your editor)
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# IDE specific files
+.idea/
+.vscode/
+
+# Coverage reports
+coverage/
+
+# Webpack generated files (if using webpack)
+dist/
+build/
+
+# Frontend framework specific files (adjust based on framework)
+node_modules/
+
+# Testing frameworks
+venv/
+.tox/

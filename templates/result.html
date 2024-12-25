@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Parsed Receipt Details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+        }
+        .data-container {
+            max-width: 600px;
+            margin: 0 auto;
+            text-align: left;
+            background-color: #f8f8f8;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .data-container p {
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        .links {
+            margin-top: 20px;
+        }
+        .links a {
+            text-decoration: none;
+            margin: 0 10px;
+            padding: 10px 20px;
+            color: #fff;
+            border-radius: 5px;
+            background-color: #4CAF50;
+            transition: background-color 0.3s;
+        }
+        .links a.logout {
+            background-color: #dc3545;
+        }
+        .links a:hover {
+            background-color: #3e8e41;
+        }
+        .links a.logout:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+<body>
+    <h1>Parsed Receipt Details</h1>
+    <div class="data-container">
+        <p><strong>Store Name:</strong> {{ company_name }}</p>
+        <p><strong>Customer:</strong> {{ customer }}</p>
+        <p><strong>Order Date:</strong> {{ order_date }}</p>
+        <p><strong>Sales Person:</strong> {{ sales_person }}</p>
+        <p><strong>Invoice Number:</strong> {{ rq_invoice }}</p>
+        <p><strong>Total Price:</strong> {{ total_price }}</p>
+        <p><strong>Accessory Prices:</strong> {{ accessories_prices }}</p>
+        <p><strong>Upgraded Lines:</strong> {{ upgrades_count }}</p>
+        <p><strong>Activated Lines:</strong> {{ activations_count }}</p>
+        <p><strong>PPP Present:</strong> {{ ppp_present }}</p>
+        <p><strong>Total Activation Fee:</strong> {{ activation_fee_sum }}</p>
+    </div>
+
+    <div class="links">
+        <a href="{{ url_for('view_receipts') }}">View All Receipts</a>
+        <a href="{{ url_for('upload_pdf') }}">Upload Another PDF</a>
+        <a href="{{ url_for('logout') }}" class="logout">Logout</a>
+    </div>
+</body>
+</html>

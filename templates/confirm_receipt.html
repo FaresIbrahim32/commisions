@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Confirm Receipt Details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .form-container {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        label, input, textarea {
+            width: 100%;
+            display: block;
+            margin: 8px 0;
+        }
+        input[type="text"], input[type="number"], textarea {
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        .confirm-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #60a82c;
+            color: #ffffff;
+            cursor: pointer;
+            margin-top: 10px;
+            width: 100%;
+        }
+        .confirm-btn:hover {
+            background-color: #4e8725;
+        }
+    </style>
+</head>
+<body>
+    <h1>Does This Look Right?</h1>
+    <div class="form-container">
+        <form method="POST" action="{{ url_for('confirm_receipt') }}">
+            <label>Company Name:</label>
+            <input type="text" name="company_name" value="{{ company_name }}" required>
+            
+            <label>Customer:</label>
+            <input type="text" name="customer" value="{{ customer }}" required>
+            
+            <label>Order Date:</label>
+            <input type="text" name="order_date" value="{{ order_date }}" required>
+            
+            <label>Sales Person:</label>
+            <input type="text" name="sales_person" value="{{ sales_person }}" required>
+            
+            <label>Invoice Number:</label>
+            <input type="text" name="rq_invoice" value="{{ rq_invoice }}" required>
+            
+            <label>Total Price:</label>
+            <input type="number" step="0.01" name="total_price" value="{{ total_price }}" required>
+            
+            <label>Accessory Prices (comma-separated):</label>
+            <input type="text" name="accessories_prices" value="{{ accessories_prices }}" required>
+            
+            <label>Upgrades Count:</label>
+            <input type="number" name="upgrades_count" value="{{ upgrades_count }}" required>
+            
+            <label>Activations Count:</label>
+            <input type="number" name="activations_count" value="{{ activations_count }}" required>
+
+            <label>PPP Present:</label>
+            <input type="checkbox" name="ppp_present" {% if ppp_present %}checked{% endif %}>
+            
+            <label>Activation Fee Sum:</label>
+            <input type="number" step="0.01" name="activation_fee_sum" value="{{ activation_fee_sum }}" required>
+            
+            <button type="submit" class="confirm-btn">Confirm</button>
+        </form>
+    </div>
+</body>
+</html>

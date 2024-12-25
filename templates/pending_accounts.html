@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pending Approvals</title>
+</head>
+<body>
+    <h2>Accounts Pending Approval</h2>
+    <ul>
+        {% for user in users %}
+            <li>{{ user[0] }} - <form action="{{ url_for('approve_account', username=user[0]) }}" method="post">
+                <button type="submit">Approve</button>
+            </form></li>
+        {% endfor %}
+    </ul>
+    <form action="{{ url_for('approve_user_account', user_id=user_id) }}" method="post">
+        <p>Name: {{ user[1] }}</p>
+        <p>Email: {{ user[2] }}</p>
+        <p>Phone: {{ user[3] }}</p>
+        <label for="username">Assign Username:</label>
+        <input type="text" name="username" required>
+        <input type="hidden" name="user_id" value="{{ user[0] }}">
+        <button type="submit">Approve Account</button>
+    </form>
+</body>
+</html>

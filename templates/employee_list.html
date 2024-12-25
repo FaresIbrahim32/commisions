@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Employee Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            font-size: 24px;
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .actions {
+            text-align: right;
+            margin-bottom: 20px;
+        }
+        .actions a {
+            text-decoration: none;
+            color: #333;
+            padding: 10px 20px;
+            border-radius: 5px;
+            background-color: #f8f8f8;
+            border: 1px solid #ddd;
+            margin-left: 10px;
+        }
+        .actions .logout {
+            background-color: #dc3545;
+            color: #fff;
+        }
+        .actions .logout:hover {
+            background-color: #c82333;
+        }
+        .actions a:hover {
+            background-color: #ddd;
+        }
+        .search-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .search-box {
+            width: 80%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 12px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .btn {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            color: #fff;
+            cursor: pointer;
+            margin: 2px;
+        }
+        .assign {
+            background-color: #007bff;
+        }
+        .approve {
+            background-color: #28a745;
+        }
+        .reject {
+            background-color: #dc3545;
+        }
+        .delete {
+            background-color: #6c757d;
+        }
+        .btn:hover {
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Employee Management</h1>
+        <div class="actions">
+            <a href="{{ url_for('admin_home') }}">Return to Admin Dashboard</a>
+            <a href="{{ url_for('logout') }}" class="logout">Logout</a>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="search-container">
+            <input type="text" id="searchInput" class="search-box" placeholder="Search by username..." onkeyup="filterEmployees()">
+        </div>
+
+        <table id="employeeTable">
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for employee in employees %}
+                <tr>
+                    <td>{{ employee[4] }}</td>
+                    <td>{{ employee[1] }}</td>
+                    <td>{{ employee[2] }}</td>
+                    <td>{{ employee[3] }}</td> 
+                    <td>
+                        {% if employee[5] == 1 %}
+                            Approved
+                        {% elif employee[7] == 1 %}
+                            Rejected
+                        {% else %}
+                            Pending
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if employee[4] is none %}
+                            <form method="POST" action="{{ url_for('assign_username', user_id=employee[0]) }}">
+                                <input type="text" name="username" placeholder="Assign Username">
+                                <button type="submit" class="btn assign">Assign</button>
+                            </form>
+                        {% endif %}
+                        <form method="POST" action="{{ url_for('approve_account', user_id=employee[0]) }}">
+                            <button type="submit" class="btn approve">Approve</button>
+                        </form>
+                        <form method="POST" action="{{ url_for('reject_account', user_id=employee[0]) }}">
+                            <button type="submit" class="btn reject">Reject</button>
+                        </form>
+                        <form method="POST" action="{{ url_for('delete_account', user_id=employee[0]) }}" onsubmit="return confirm('Are you sure you want to delete the account for {{ employee[2] }}?');">
+                            <button type="submit" class="btn delete">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <br><br>
+        <div class="actions">
+            <a href="{{ url_for('admin_home') }}">Return to Admin Dashboard</a>
+            <a href="{{ url_for('logout') }}" class="logout">Logout</a>
+        </div>
+    </div>
+
+    <script>
+        // JavaScript to filter employee table based on search input
+        function filterEmployees() {
+            const input = document.getElementById('searchInput');
+            const filter = input.value.toLowerCase();
+            const table = document.getElementById('employeeTable');
+            const tr = table.getElementsByTagName('tr');
+            
+            for (let i = 1; i < tr.length; i++) {
+                const td = tr[i].getElementsByTagName('td')[0];
+                if (td) {
+                    const txtValue = td.textContent || td.innerText;
+                    if (txtValue.toLowerCase().indexOf(filter) > -1) {
+                        tr[i].style.display = '';
+                    } else {
+                        tr[i].style.display = 'none';
+                    }
+                }       
+            }
+        }
+    </script>
+    
+    
+
+</body>
+</html>
