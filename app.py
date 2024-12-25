@@ -9,7 +9,6 @@ import PyPDF2
 import math
 import string
 import random
-import os
 
 
 app = Flask(__name__)
@@ -20,8 +19,7 @@ bcrypt = Bcrypt(app)
 limiter = Limiter(key_func=get_remote_address)
 limiter.init_app(app)
 
-BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-DATABASE = os.getenv('DATABASE_URL', os.path.join(BASE_DIR, 'instance', 'users.db'))
+DATABASE = 'users.db'
 
 def init_db():
     db = get_db()
