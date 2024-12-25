@@ -42,7 +42,7 @@ def init_db():
 
     # Create the parsed_receipts_new table
     db.execute('''
-        CREATE TABLE IF NOT EXISTS parsed_receipts_new (
+        CREATE TABLE IF NOT EXISTS parsed_receipts (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             company_name TEXT,
             customer TEXT,
