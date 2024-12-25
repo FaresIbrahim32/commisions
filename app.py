@@ -59,7 +59,22 @@ def init_db():
         );
     ''')
 
-  
+    # These are the new lines added after your existing db.execute statements:
+    
+    # Check if admin user exists
+    cursor = db.cursor()
+    cursor.execute("SELECT * FROM users WHERE username = 'admin'")
+    admin_exists = cursor.fetchone()
+
+    # Create default admin if it doesn't exist
+    if not admin_exists:
+        admin_password = bcrypt.generate_password_hash('admin123').decode('utf-8')
+        db.execute('''
+            INSERT INTO users (name, email, phone, username, password, approved, is_admin)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        ''', ('Admin User', 'admin@example.com', '1234567890', 'admin', admin_password, 1, 1))
+
+    
 
     db.commit()
 
