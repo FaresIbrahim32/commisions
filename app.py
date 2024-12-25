@@ -36,7 +36,8 @@ def init_db():
             username TEXT UNIQUE,
             password TEXT,
             approved INTEGER DEFAULT 0,
-            is_admin INTEGER DEFAULT 0
+            is_admin INTEGER DEFAULT 0,
+            rejected INTEGER DEFAULT 0
         );
     ''')
 
