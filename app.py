@@ -58,17 +58,7 @@ def init_db():
         );
     ''')
 
-    # Copy the data from parsed_receipts into parsed_receipts_new
-    db.execute('''
-        INSERT INTO parsed_receipts_new (id, company_name, customer, order_date, sales_person, rq_invoice, total_price, accessory_prices, upgrades_count, activations_count, ppp_present, activation_fee_sum)
-        SELECT id, company_name, customer, order_date, sales_person, rq_invoice, total_price, accessory_prices, upgrades_count, activations_count, ppp_present, activation_fee_sum FROM parsed_receipts;
-    ''')
-
-    # Drop the old parsed_receipts table
-    db.execute('DROP TABLE IF EXISTS parsed_receipts;')
-
-    # Rename parsed_receipts_new to parsed_receipts
-    db.execute('ALTER TABLE parsed_receipts_new RENAME TO parsed_receipts;')
+  
 
     db.commit()
 
