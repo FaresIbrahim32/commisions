@@ -6,85 +6,296 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 20px;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        .form-container {
-            background: #ffffff;
+            background-color: #e6e6e6;
+            margin: 0;
             padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        .main-container {
+            max-width: 1000px;
+            margin: 0 auto;
         }
         h1 {
             text-align: center;
             color: #333;
+            margin-bottom: 30px;
         }
-        label, input, textarea {
-            width: 100%;
+        .section-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+        }
+        .row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+        .field-group {
+            flex: 1;
+            margin-bottom: 15px;
+        }
+        .center-field {
+            width: 50%;
+            margin: 0 auto;
+        }
+        .bottom-sections {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .devices-section, .accessories-section {
+            flex: 1;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        label {
             display: block;
-            margin: 8px 0;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
         }
-        input[type="text"], input[type="number"], textarea {
+        input {
+            width: 100%;
             padding: 8px;
-            border-radius: 5px;
             border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        input[type="checkbox"] {
+            width: auto;
+            margin-right: 10px;
+        }
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+        }
+        .checkbox-group label {
+            display: inline;
+            margin: 0;
         }
         .confirm-btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            background-color: #60a82c;
-            color: #ffffff;
-            cursor: pointer;
-            margin-top: 10px;
             width: 100%;
+            padding: 12px;
+            background-color: #60a82c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
         }
         .confirm-btn:hover {
             background-color: #4e8725;
         }
+        .section-title {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .input-with-verify {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .verify-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap;
+        }
+        .mismatch-warning {
+            color: #dc3545;
+            font-size: 0.9em;
+            margin-top: 5px;
+            display: none;
+        }
+        .verify-checkbox input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+        }
+        
     </style>
 </head>
 <body>
-    <h1>Does This Look Right?</h1>
-    <div class="form-container">
+    <div class="main-container">
+        <h1>Does This Look Right?</h1>
         <form method="POST" action="{{ url_for('confirm_receipt') }}">
-            <label>Company Name:</label>
-            <input type="text" name="company_name" value="{{ company_name }}" required>
-            
-            <label>Customer:</label>
-            <input type="text" name="customer" value="{{ customer }}" required>
-            
-            <label>Order Date:</label>
-            <input type="text" name="order_date" value="{{ order_date }}" required>
-            
-            <label>Sales Person:</label>
-            <input type="text" name="sales_person" value="{{ sales_person }}" required>
-            
-            <label>Invoice Number:</label>
-            <input type="text" name="rq_invoice" value="{{ rq_invoice }}" required>
-            
-            <label>Total Price:</label>
-            <input type="number" step="0.01" name="total_price" value="{{ total_price }}" required>
-            
-            <label>Accessory Prices (comma-separated):</label>
-            <input type="text" name="accessories_prices" value="{{ accessories_prices }}" required>
-            
-            <label>Upgrades Count:</label>
-            <input type="number" name="upgrades_count" value="{{ upgrades_count }}" required>
-            
-            <label>Activations Count:</label>
-            <input type="number" name="activations_count" value="{{ activations_count }}" required>
+            <!-- Customer Information Section -->
+            <div class="section-container">
+                <!-- Company Name and Sales Person row -->
+                <div class="row">
+                    <div class="field-group">
+                        <label>Store Location:</label>
+                        <select name="company_name" required>
+                            <option value="">Select Store</option>
+                            <option value="100: Zephyrhills" {% if company_name == "100: Zephyrhills" %}selected{% endif %}>100: Zephyrhills</option>
+                            <option value="101: Dade City" {% if company_name == "101: Dade City" %}selected{% endif %}>101: Dade City</option>
+                            <option value="102: Brooksville" {% if company_name == "102: Brooksville" %}selected{% endif %}>102: Brooksville</option>
+                            <option value="105: Chiefland" {% if company_name == "105: Chiefland" %}selected{% endif %}>105: Chiefland</option>
+                            <option value="111: Sun City Center" {% if company_name == "111: Sun City Center" %}selected{% endif %}>111: Sun City Center</option>
+                            <option value="112: Gibsonton" {% if company_name == "112: Gibsonton" %}selected{% endif %}>112: Gibsonton</option>
+                            <option value="114: Dover" {% if company_name == "114: Dover" %}selected{% endif %}>114: Dover</option>
+                            <option value="115: Hillsborough" {% if company_name == "115: Hillsborough" %}selected{% endif %}>115: Hillsborough</option>
+                            <option value="116: Gunn Hwy" {% if company_name == "116: Gunn Hwy" %}selected{% endif %}>116: Gunn Hwy</option>
+                            <option value="117: Springhill" {% if company_name == "117: Springhill" %}selected{% endif %}>117: Springhill</option>
+                            <option value="118: Gainesville" {% if company_name == "118: Gainesville" %}selected{% endif %}>118: Gainesville</option>
+                        </select>
+                    </div>
+                    <div class="field-group">
+                        <label>Sales Person:</label>
+                        <input type="text" name="sales_person" value="{{ sales_person }}" required>
+                        <div class="mismatch-warning">Note: This differs from your account name ({{ logged_in_user }})</div>
+                    </div>
+                </div>
+                
+                <!-- Order Date and Customer row -->
+                <div class="row">
+                    <div class="field-group">
+                        <label>Order Date:</label>
+                        <input type="text" name="order_date" value="{{ order_date }}" required>
+                    </div>
+                    <div class="field-group">
+                        <label>Customer:</label>
+                        <input type="text" name="customer" value="{{ customer }}" required>
+                    </div>
+                </div>
 
-            <label>PPP Present:</label>
-            <input type="checkbox" name="ppp_present" {% if ppp_present %}checked{% endif %}>
+                <!-- Centered Invoice Number -->
+                <div class="center-field">
+                    <label>Invoice Number:</label>
+                    <div class="input-with-verify">
+                        <input type="text" name="rq_invoice" value="{{ rq_invoice }}" required>
+                        <div class="verify-checkbox">
+                            <input type="checkbox" id="invoice_verified" required>
+                            <label for="invoice_verified">Verified</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Devices Section -->
+            <div class="devices-section">
+                <div class="section-title">Devices</div>
+                
+                <div class="field-group">
+                    <label>Activations Count:</label>
+                    <input type="number" name="activations_count" value="{{ activations_count }}" required>
+                </div>
             
-            <label>Activation Fee Sum:</label>
-            <input type="number" step="0.01" name="activation_fee_sum" value="{{ activation_fee_sum }}" required>
+                <div class="field-group">
+                    <label>Upgrades Count:</label>
+                    <input type="number" name="upgrades_count" value="{{ upgrades_count }}" required>
+                </div>
             
+                {% if imei_iccid_pairs %}
+                <div class="device-pairs">
+                    <table style="width: 100%; margin-top: 15px;">
+                        <thead>
+                            <tr>
+                                <th>Device #</th>
+                                <th>IMEI</th>
+                                <th>ICCID</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for pair in imei_iccid_pairs %}
+                            <tr>
+                                <td>{{ loop.index }}</td>
+                                <td>{{ pair.imei }}</td>
+                                <td>{{ pair.iccid }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+            </div>
+    
+    <div class="field-group">
+        <label>Activation Fee Sum:</label>
+        <input type="number" step="0.01" name="activation_fee_sum" value="{{ activation_fee_sum }}" required>
+    </div>
+</div>
+
+                <!-- Accessories Section -->
+                <div class="accessories-section">
+                    <div class="section-title">Accessories</div>
+                    <div class="field-group">
+                        <label>Accessories Sold:</label>
+                        <div class="input-with-verify">
+                            <input type="number" step="0.01" name="total_price" value="{{ total_price }}" required>
+                            <div class="verify-checkbox">
+                                <input type="checkbox" id="accessories_verified" required>
+                                <label for="accessories_verified">Verified</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field-group">
+                        <label>Accessory Prices (comma-separated):</label>
+                        <input type="text" name="accessories_prices" value="{{ accessories_prices }}" required>
+                    </div>
+                </div>
+            </div>
+
             <button type="submit" class="confirm-btn">Confirm</button>
         </form>
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.querySelector('form');
+            const salesPersonInput = document.querySelector('input[name="sales_person"]');
+            const loggedInUserName = "{{ logged_in_user_name }}";
+        
+            function getFirstName(fullName) {
+                return fullName.trim().split(' ')[0].toUpperCase();
+            }
+        
+            form.onsubmit = function(e) {
+                const receiptFirstName = getFirstName(salesPersonInput.value);
+                const loggedInFirstName = getFirstName(loggedInUserName);
+        
+                if (receiptFirstName !== loggedInFirstName) {
+                    const confirmed = confirm(`This receipt shows sales by ${salesPersonInput.value}, but you are logged in as ${loggedInUserName}. Are you sure you want to continue?`);
+                    if (!confirmed) {
+                        e.preventDefault();
+                        return false;
+                    }
+                }
+                return true;
+            };
+        
+            // Real-time warning
+            salesPersonInput.addEventListener('input', function() {
+                const warningDiv = this.parentElement.querySelector('.mismatch-warning');
+                const receiptFirstName = getFirstName(salesPersonInput.value);
+                const loggedInFirstName = getFirstName(loggedInUserName);
+        
+                if (receiptFirstName !== loggedInFirstName) {
+                    if (!warningDiv) {
+                        const div = document.createElement('div');
+                        div.className = 'mismatch-warning';
+                        div.style.color = '#dc3545';
+                        div.style.fontSize = '0.9em';
+                        div.style.marginTop = '5px';
+                        div.textContent = `Note: This differs from your name (${loggedInUserName})`;
+                        this.parentElement.appendChild(div);
+                    }
+                } else if (warningDiv) {
+                    warningDiv.remove();
+                }
+            });
+        });
+        </script>
 </body>
 </html>
