@@ -216,7 +216,7 @@ def generate_random_password(length, include_special_chars=False):
     return password
 
 # Single login route with rate limiting
-@app.route('/login', methods=['GET', 'POST'])
+@app.route('/', methods=['GET', 'POST'])
 @limiter.limit("20 per minute")
 def login():
     if request.method == 'POST':
@@ -229,18 +229,19 @@ def login():
         cursor.execute("SELECT * FROM users WHERE username = ?", (username,))
         user = cursor.fetchone()
         
-        if user and bcrypt.check_password_hash(user[5], password):
-            if user[6] == 1:
+        if user and bcrypt.check_password_hash(user[5], password):  # Assuming password is in the 3rd column
+            if user[6] == 1:  # Assuming approved status is in the 4th column
                 session.permanent = True
                 session['logged_in'] = True
                 session['username'] = username
                 session['user_id'] = user[1]
                 
-                if user[7] == 1:
+                # Check if the user is an admin
+                if user[7] == 1:  # Assuming is_admin status is in the 5th column
                     session['admin'] = True
-                    return redirect(url_for('admin_home'))
+                    return redirect(url_for('admin_home'))  # Redirect to the Admin Home Page
 
-                return redirect(url_for('non_admin_dashboard'))
+                return redirect(url_for('non_admin_dashboard'))  # Redirect regular users to the PDF upload page
             else:
                 return "Your account is pending approval. Please try again later."
         else:
@@ -248,10 +249,16 @@ def login():
 
     return render_template('login.html')
 
-# Make landing page the home page
-@app.route('/')
+# Home route
+@app.route('/home')
 def home():
-    return render_template('landing.html')
+    if 'logged_in' in session:
+        # Check if the user is an admin
+        if 'admin' in session:
+            return redirect(url_for('employee_list'))  # Redirect admins to the employee list
+        return redirect(url_for('upload_pdf'))  # Redirect regular users to the PDF upload page
+    else:
+        return redirect(url_for('login'))
 
 @app.route('/admin/home')
 def admin_home():
@@ -622,4 +629,5 @@ def commission():
 if __name__ == '__main__':
     with app.app_context():
         init_db()  # Initialize the database tables
-    app.run(debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port,debug=True)
