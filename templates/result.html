@@ -2,72 +2,195 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Parsed Receipt Details</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Smart Touch Wireless - Receipt Details</title>
     <style>
-        body {
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
             font-family: Arial, sans-serif;
-            margin: 20px;
+        }
+
+        body {
+            background-color: #f4f4f4;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #43B02A;
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 2rem;
+        }
+
+        .data-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .info-group {
+            display: flex;
+            border-bottom: 1px solid #eee;
+            padding: 1rem 0;
+        }
+
+        .info-group:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: bold;
+            color: #333;
+            min-width: 200px;
+        }
+
+        .info-value {
+            color: #666;
+            flex: 1;
+        }
+
+        .button-container {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            text-decoration: none;
             text-align: center;
         }
-        h1 {
-            color: #333;
+
+        .btn-primary {
+            background-color: #43B02A;
+            color: white;
         }
-        .data-container {
-            max-width: 600px;
-            margin: 0 auto;
-            text-align: left;
-            background-color: #f8f8f8;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+
+        .btn-primary:hover {
+            background-color: #378522;
         }
-        .data-container p {
-            font-size: 16px;
-            margin: 10px 0;
+
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid #43B02A;
+            color: #43B02A;
         }
-        .links {
-            margin-top: 20px;
+
+        .btn-outline:hover {
+            background-color: #43B02A;
+            color: white;
         }
-        .links a {
-            text-decoration: none;
-            margin: 0 10px;
-            padding: 10px 20px;
-            color: #fff;
-            border-radius: 5px;
-            background-color: #4CAF50;
-            transition: background-color 0.3s;
-        }
-        .links a.logout {
+
+        .btn-danger {
             background-color: #dc3545;
+            color: white;
         }
-        .links a:hover {
-            background-color: #3e8e41;
-        }
-        .links a.logout:hover {
+
+        .btn-danger:hover {
             background-color: #c82333;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+
+            .data-container {
+                padding: 1.5rem;
+            }
+
+            .info-group {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .button-container {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+                margin-bottom: 1.5rem;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>Parsed Receipt Details</h1>
-    <div class="data-container">
-        <p><strong>Store Name:</strong> {{ company_name }}</p>
-        <p><strong>Customer:</strong> {{ customer }}</p>
-        <p><strong>Order Date:</strong> {{ order_date }}</p>
-        <p><strong>Sales Person:</strong> {{ sales_person }}</p>
-        <p><strong>Invoice Number:</strong> {{ rq_invoice }}</p>
-        <p><strong>Total Price:</strong> {{ total_price }}</p>
-        <p><strong>Accessory Prices:</strong> {{ accessories_prices }}</p>
-        <p><strong>Upgraded Lines:</strong> {{ upgrades_count }}</p>
-        <p><strong>Activated Lines:</strong> {{ activations_count }}</p>
-        <p><strong>PPP Present:</strong> {{ ppp_present }}</p>
-        <p><strong>Total Activation Fee:</strong> {{ activation_fee_sum }}</p>
-    </div>
+    <div class="container">
+        <h1>Receipt Details</h1>
+        <div class="data-container">
+            <div class="info-group">
+                <span class="info-label">Store Name:</span>
+                <span class="info-value">{{ company_name }}</span>
+            </div>
+            <div class="info-group">
+                <span class="info-label">Customer:</span>
+                <span class="info-value">{{ customer }}</span>
+            </div>
+            <div class="info-group">
+                <span class="info-label">Order Date:</span>
+                <span class="info-value">{{ order_date }}</span>
+            </div>
+            <div class="info-group">
+                <span class="info-label">Sales Person:</span>
+                <span class="info-value">{{ sales_person }}</span>
+            </div>
+            <div class="info-group">
+                <span class="info-label">Invoice Number:</span>
+                <span class="info-value">{{ rq_invoice }}</span>
+            </div>
+            <div class="info-group">
+                <span class="info-label">Total Price:</span>
+                <span class="info-value">{{ total_price }}</span>
+            </div>
+            <div class="info-group">
+                <span class="info-label">Accessory Prices:</span>
+                <span class="info-value">{{ accessories_prices }}</span>
+            </div>
+            <div class="info-group">
+                <span class="info-label">Upgraded Lines:</span>
+                <span class="info-value">{{ upgrades_count }}</span>
+            </div>
+            <div class="info-group">
+                <span class="info-label">Activated Lines:</span>
+                <span class="info-value">{{ activations_count }}</span>
+            </div>
+            <div class="info-group">
+                <span class="info-label">PPP Present:</span>
+                <span class="info-value">{{ ppp_present }}</span>
+            </div>
+            <div class="info-group">
+                <span class="info-label">Total Activation Fee:</span>
+                <span class="info-value">{{ activation_fee_sum }}</span>
+            </div>
+        </div>
 
-    <div class="links">
-        <a href="{{ url_for('view_receipts') }}">View All Receipts</a>
-        <a href="{{ url_for('upload_pdf') }}">Upload Another PDF</a>
-        <a href="{{ url_for('logout') }}" class="logout">Logout</a>
+        <div class="button-container">
+            <a href="{{ url_for('view_receipts') }}" class="btn btn-outline">View All Receipts</a>
+            <a href="{{ url_for('upload_pdf') }}" class="btn btn-primary">Upload Another PDF</a>
+            <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
+        </div>
     </div>
 </body>
 </html>

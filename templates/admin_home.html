@@ -2,67 +2,99 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Admin Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Smart Touch Wireless - Admin Dashboard</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f4f4f4;
+        }
+
+        .main-content {
+            min-height: 100vh;
             display: flex;
-            justify-content: center;
             align-items: center;
-            height: 100vh;
+            justify-content: center;
+            padding: 2rem;
         }
-        .container {
-            text-align: center;
-            background: #fff;
-            padding: 40px;
+
+        .dashboard-container {
+            background: white;
+            padding: 2rem;
             border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            width: 300px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
         }
+
         h1 {
-            font-size: 24px;
-            color: #333;
-            margin-bottom: 20px;
-        }
-        a, .button {
-            display: block;
-            margin: 15px 0;
-            font-size: 18px;
-            text-decoration: none;
-            color: #333;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            background-color: #f8f8f8;
-            transition: background-color 0.3s;
-            width: 200px;
-            margin-left: auto;
-            margin-right: auto;
+            color: #43B02A;
+            margin-bottom: 1.5rem;
             text-align: center;
+            font-size: 2rem;
         }
-        a:hover, .button:hover {
-            background-color: #ddd;
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            text-align: center;
+            transition: background-color 0.3s;
         }
-        .logout {
+
+        .btn-primary {
+            background-color: #43B02A;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #378522;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            color: #43B02A;
+            border: 2px solid #43B02A;
+        }
+
+        .btn-outline:hover {
+            background-color: #43B02A;
+            color: white;
+        }
+
+        .btn-danger {
             background-color: #dc3545;
             color: white;
-            text-align: center;
+            border: none;
         }
-        .logout:hover {
+
+        .btn-danger:hover {
             background-color: #c82333;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Admin Dashboard</h1>
-        <a href="{{ url_for('employee_list') }}">Employee Management</a>
-        <a href="{{ url_for('view_receipts') }}">Commission of All Employees</a>
-        <a href="#">Placeholder Link</a>
-        <a href="{{ url_for('logout') }}" class="button logout">Logout</a>
-    </div>
+    <main class="main-content">
+        <div class="dashboard-container">
+            <h1>Admin Dashboard</h1>
+            <a href="{{ url_for('employee_list') }}" class="btn btn-outline">Employee Management</a>
+            <a href="{{ url_for('view_receipts') }}" class="btn btn-outline">Commission of All Employees</a>
+            <a href="#" class="btn btn-outline">Placeholder Link</a>
+            <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
+        </div>
+    </main>
 </body>
 </html>

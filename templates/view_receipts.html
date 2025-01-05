@@ -2,139 +2,216 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>View Stored Receipts</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Smart Touch Wireless - Stored Receipts</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+        * {
             margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
         }
+
+        body {
+            background-color: #f4f4f4;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
         .container {
-            max-width: 90%;
+            max-width: 1400px;
             margin: 0 auto;
-            background: #ffffff;
-            padding: 20px;
+            background: white;
+            padding: 2rem;
             border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
+
         h1 {
+            color: #43B02A;
             text-align: center;
-            color: #333;
-            font-size: 26px;
-            margin-bottom: 20px;
+            margin-bottom: 2rem;
+            font-size: 2rem;
         }
+
+        .table-wrapper {
+            overflow-x: auto;
+            margin-bottom: 2rem;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
-            margin: 20px 0;
         }
-        table, th, td {
-            border: 1px solid #ddd;
-            padding: 12px;
-            text-align: center;
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+            white-space: nowrap;
         }
+
         th {
-            background-color: #60a82c;
-            color: #ffffff;
+            background-color: #43B02A;
+            color: white;
             font-weight: bold;
         }
+
         tr:nth-child(even) {
-            background-color: #f9f9f9;
+            background-color: #f8f9fa;
         }
+
         tr:hover {
-            background-color: #f1f1f1;
+            background-color: #f2f7f2;
         }
+
         .actions {
             display: flex;
-            gap: 10px;
-            justify-content: center;
+            gap: 0.5rem;
         }
+
         .btn {
-            padding: 8px 14px;
+            padding: 0.5rem 1rem;
             border: none;
             border-radius: 5px;
-            color: #ffffff;
-            font-size: 14px;
+            font-size: 0.9rem;
+            font-weight: bold;
             cursor: pointer;
+            transition: background-color 0.3s;
             text-decoration: none;
-            display: inline-block;
+            color: white;
         }
-        .edit-btn {
-            background-color: #60a82c;
+
+        .btn-edit {
+            background-color: #43B02A;
         }
-        .delete-btn {
+
+        .btn-edit:hover {
+            background-color: #378522;
+        }
+
+        .btn-delete {
             background-color: #dc3545;
         }
-        .btn:hover {
-            opacity: 0.85;
+
+        .btn-delete:hover {
+            background-color: #c82333;
         }
-        .link-bar {
-            text-align: center;
-            margin-top: 20px;
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 2rem;
         }
-        .link-bar a {
-            text-decoration: none;
-            margin: 0 10px;
-            padding: 10px 20px;
-            color: #ffffff;
-            border-radius: 5px;
-            background-color: #60a82c;
-            transition: background-color 0.3s;
+
+        .btn-large {
+            padding: 1rem 2rem;
+            font-size: 1rem;
         }
-        .link-bar a:hover {
-            background-color: #60a82c;
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            background-color: #e9ecef;
+        }
+
+        .status-yes {
+            background-color: #43B02A;
+            color: white;
+        }
+
+        .status-no {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .button-container {
+                flex-direction: column;
+            }
+
+            .btn-large {
+                width: 100%;
+                text-align: center;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Stored Receipts</h1>
-        <table>
-            <tr>
-                <th>Company Name</th>
-                <th>Customer</th>
-                <th>Order Date</th>
-                <th>Sales Person</th>
-                <th>Invoice Number</th>
-                <th>Total Price</th>
-                <th>Upgrades</th>
-                <th>Activations</th>
-                <th>PPP Present</th>
-                <th>Activation Fee Sum</th>
-                <th>Actions</th>
-            </tr>
-            {% for receipt in receipts %}
-            <tr>
-                <td>{{ receipt[1] }}</td>
-                <td>{{ receipt[2] }}</td>
-                <td>{{ receipt[3] }}</td>
-                <td>{{ receipt[4] }}</td>
-                <td>{{ receipt[5] }}</td>
-                <td>{{ receipt[6] }}</td>
-                <td>{{ receipt[8] }}</td>
-                <td>{{ receipt[9] }}</td>
-                <td>{{ 'Yes' if receipt[10] else 'No' }}</td>
-                <td>{{ receipt[11] }}</td>
-                <td class="actions">
-                    <a href="{{ url_for('edit_receipt', receipt_id=receipt[0]) }}" class="btn edit-btn">Edit</a>
-                    <form action="{{ url_for('delete_receipt', receipt_id=receipt[0]) }}" method="post" style="display:inline;">
-                        <button type="submit" class="btn delete-btn" onclick="return confirm('Are you sure you want to delete this receipt?');">Delete</button>
-                    </form>
-                </td>
-            </tr>
-            {% endfor %}
-        </table>
+        
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Company Name</th>
+                        <th>Customer</th>
+                        <th>Order Date</th>
+                        <th>Sales Person</th>
+                        <th>Invoice Number</th>
+                        <th>Total Price</th>
+                        <th>Upgrades</th>
+                        <th>Activations</th>
+                        <th>PPP Present</th>
+                        <th>Activation Fee</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for receipt in receipts %}
+                    <tr>
+                        <td>{{ receipt[1] }}</td>
+                        <td>{{ receipt[2] }}</td>
+                        <td>{{ receipt[3] }}</td>
+                        <td>{{ receipt[4] }}</td>
+                        <td>{{ receipt[5] }}</td>
+                        <td>${{ receipt[6] }}</td>
+                        <td>{{ receipt[8] }}</td>
+                        <td>{{ receipt[9] }}</td>
+                        <td>
+                            <span class="status-badge {% if receipt[10] %}status-yes{% else %}status-no{% endif %}">
+                                {{ 'Yes' if receipt[10] else 'No' }}
+                            </span>
+                        </td>
+                        <td>${{ receipt[11] }}</td>
+                        <td class="actions">
+                            <a href="{{ url_for('edit_receipt', receipt_id=receipt[0]) }}" class="btn btn-edit">Edit</a>
+                            <form action="{{ url_for('delete_receipt', receipt_id=receipt[0]) }}" method="post" style="display:inline;">
+                                <button type="submit" 
+                                        class="btn btn-delete" 
+                                        onclick="return confirm('Are you sure you want to delete this receipt?');">
+                                    Delete
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
 
-        <!-- Link bar for navigation -->
-        <div class="link-bar">
-            <a href="{{ url_for('upload_pdf') }}">Upload Another Receipt</a>
-            <a href="{{ url_for('logout') }}">Logout</a>
+        <div class="button-container">
+            <a href="{{ url_for('upload_pdf') }}" class="btn btn-edit btn-large">Upload Another Receipt</a>
+            <a href="{{ url_for('logout') }}" class="btn btn-delete btn-large">Logout</a>
         </div>
     </div>
 </body>
 </html>
-

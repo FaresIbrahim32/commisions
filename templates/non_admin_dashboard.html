@@ -2,67 +2,104 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Home</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Smart Touch Wireless - Home</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f4f4f4;
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            padding: 1rem;
         }
+
         .container {
-            text-align: center;
-            background: #fff;
-            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            background: white;
+            padding: 2rem;
             border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            width: 300px;
-        }
-        h1 {
-            font-size: 24px;
-            color: #333;
-            margin-bottom: 20px;
-        }
-        a, .button {
-            display: block;
-            margin: 15px 0;
-            font-size: 18px;
-            text-decoration: none;
-            color: #333;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            background-color: #f8f8f8;
-            transition: background-color 0.3s;
-            width: 200px;
-            margin-left: auto;
-            margin-right: auto;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             text-align: center;
         }
-        a:hover, .button:hover {
-            background-color: #ddd;
+
+        h1 {
+            color: #43B02A;
+            margin-bottom: 2rem;
+            font-size: 2rem;
         }
-        .logout {
+
+        .btn-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .btn {
+            display: block;
+            padding: 1rem;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .btn-primary {
+            background-color: transparent;
+            border-color: #43B02A;
+            color: #43B02A;
+        }
+
+        .btn-primary:hover {
+            background-color: #43B02A;
+            color: white;
+        }
+
+        .btn-danger {
             background-color: #dc3545;
             color: white;
-            text-align: center;
+            border-color: #dc3545;
         }
-        .logout:hover {
+
+        .btn-danger:hover {
             background-color: #c82333;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1.5rem;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .btn {
+                padding: 0.8rem;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Home</h1>
-        <a href="{{ url_for('upload_pdf') }}">Enter Sales</a>
-        <a href="{{ url_for('commission') }}">My Commission</a>
-        <a href="#">Velocity</a>
-        <a href="{{ url_for('logout') }}" class="button logout">Logout</a>
+        <h1>Welcome to Smart Touch Wireless</h1>
+        <div class="btn-container">
+            <a href="{{ url_for('upload_pdf') }}" class="btn btn-primary">Enter Sales</a>
+            <a href="{{ url_for('commission') }}" class="btn btn-primary">My Commission</a>
+            <a href="#" class="btn btn-primary">Velocity</a>
+            <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
+        </div>
     </div>
 </body>
 </html>

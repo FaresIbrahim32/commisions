@@ -9,6 +9,7 @@ import PyPDF2
 import math
 import string
 import random
+import os
 
 
 app = Flask(__name__)
@@ -19,7 +20,8 @@ bcrypt = Bcrypt(app)
 limiter = Limiter(key_func=get_remote_address)
 limiter.init_app(app)
 
-DATABASE = 'users.db'
+DATABASE = '/data/users.db'
+os.makedirs('/data', exist_ok=True)  # Create the directory if it doesn't exist
 
 def init_db():
     db = get_db()
@@ -34,13 +36,14 @@ def init_db():
             username TEXT UNIQUE,
             password TEXT,
             approved INTEGER DEFAULT 0,
-            is_admin INTEGER DEFAULT 0
+            is_admin INTEGER DEFAULT 0,
+            rejected INTEGER DEFAULT 0
         );
     ''')
 
     # Create the parsed_receipts_new table
     db.execute('''
-        CREATE TABLE IF NOT EXISTS parsed_receipts_new (
+        CREATE TABLE IF NOT EXISTS parsed_receipts (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             company_name TEXT,
             customer TEXT,
@@ -58,17 +61,22 @@ def init_db():
         );
     ''')
 
-    # Copy the data from parsed_receipts into parsed_receipts_new
-    db.execute('''
-        INSERT INTO parsed_receipts_new (id, company_name, customer, order_date, sales_person, rq_invoice, total_price, accessory_prices, upgrades_count, activations_count, ppp_present, activation_fee_sum)
-        SELECT id, company_name, customer, order_date, sales_person, rq_invoice, total_price, accessory_prices, upgrades_count, activations_count, ppp_present, activation_fee_sum FROM parsed_receipts;
-    ''')
+    # These are the new lines added after your existing db.execute statements:
+    
+    # Check if admin user exists
+    cursor = db.cursor()
+    cursor.execute("SELECT * FROM users WHERE username = 'admin'")
+    admin_exists = cursor.fetchone()
 
-    # Drop the old parsed_receipts table
-    db.execute('DROP TABLE IF EXISTS parsed_receipts;')
+    # Create default admin if it doesn't exist
+    if not admin_exists:
+        admin_password = bcrypt.generate_password_hash('admin123').decode('utf-8')
+        db.execute('''
+            INSERT INTO users (name, email, phone, username, password, approved, is_admin)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        ''', ('Admin User', 'admin@example.com', '1234567890', 'admin', admin_password, 1, 1))
 
-    # Rename parsed_receipts_new to parsed_receipts
-    db.execute('ALTER TABLE parsed_receipts_new RENAME TO parsed_receipts;')
+    
 
     db.commit()
 
@@ -208,7 +216,7 @@ def generate_random_password(length, include_special_chars=False):
     return password
 
 # Single login route with rate limiting
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/login', methods=['GET', 'POST'])
 @limiter.limit("20 per minute")
 def login():
     if request.method == 'POST':
@@ -221,19 +229,18 @@ def login():
         cursor.execute("SELECT * FROM users WHERE username = ?", (username,))
         user = cursor.fetchone()
         
-        if user and bcrypt.check_password_hash(user[5], password):  # Assuming password is in the 3rd column
-            if user[6] == 1:  # Assuming approved status is in the 4th column
+        if user and bcrypt.check_password_hash(user[5], password):
+            if user[6] == 1:
                 session.permanent = True
                 session['logged_in'] = True
                 session['username'] = username
                 session['user_id'] = user[1]
                 
-                # Check if the user is an admin
-                if user[7] == 1:  # Assuming is_admin status is in the 5th column
+                if user[7] == 1:
                     session['admin'] = True
-                    return redirect(url_for('admin_home'))  # Redirect to the Admin Home Page
+                    return redirect(url_for('admin_home'))
 
-                return redirect(url_for('non_admin_dashboard'))  # Redirect regular users to the PDF upload page
+                return redirect(url_for('non_admin_dashboard'))
             else:
                 return "Your account is pending approval. Please try again later."
         else:
@@ -241,16 +248,10 @@ def login():
 
     return render_template('login.html')
 
-# Home route
-@app.route('/home')
+# Make landing page the home page
+@app.route('/')
 def home():
-    if 'logged_in' in session:
-        # Check if the user is an admin
-        if 'admin' in session:
-            return redirect(url_for('employee_list'))  # Redirect admins to the employee list
-        return redirect(url_for('upload_pdf'))  # Redirect regular users to the PDF upload page
-    else:
-        return redirect(url_for('login'))
+    return render_template('landing.html')
 
 @app.route('/admin/home')
 def admin_home():
@@ -621,4 +622,5 @@ def commission():
 if __name__ == '__main__':
     with app.app_context():
         init_db()  # Initialize the database tables
-    app.run(debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port,debug=True)

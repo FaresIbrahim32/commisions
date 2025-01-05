@@ -2,88 +2,176 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Confirm Receipt Details</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Smart Touch Wireless - Confirm Receipt</title>
     <style>
-        body {
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
             font-family: Arial, sans-serif;
+        }
+
+        body {
             background-color: #f4f4f4;
-            margin: 20px;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
             max-width: 600px;
             margin: 0 auto;
-        }
-        .form-container {
-            background: #ffffff;
-            padding: 20px;
+            background: white;
+            padding: 2rem;
             border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
+
         h1 {
+            color: #43B02A;
             text-align: center;
-            color: #333;
+            margin-bottom: 2rem;
+            font-size: 2rem;
         }
-        label, input, textarea {
-            width: 100%;
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
             display: block;
-            margin: 8px 0;
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-weight: bold;
         }
-        input[type="text"], input[type="number"], textarea {
-            padding: 8px;
-            border-radius: 5px;
+
+        input[type="text"],
+        input[type="number"] {
+            width: 100%;
+            padding: 0.8rem;
             border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
         }
-        .confirm-btn {
-            padding: 10px 20px;
+
+        input[type="text"]:focus,
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #43B02A;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .checkbox-group label {
+            margin-bottom: 0;
+            cursor: pointer;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 1rem;
             border: none;
             border-radius: 5px;
-            background-color: #60a82c;
-            color: #ffffff;
+            font-size: 1rem;
+            font-weight: bold;
             cursor: pointer;
-            margin-top: 10px;
-            width: 100%;
+            transition: background-color 0.3s;
+            background-color: #43B02A;
+            color: white;
         }
-        .confirm-btn:hover {
-            background-color: #4e8725;
+
+        .btn:hover {
+            background-color: #378522;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+
+            .container {
+                padding: 1.5rem;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+                margin-bottom: 1.5rem;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>Does This Look Right?</h1>
-    <div class="form-container">
+    <div class="container">
+        <h1>Does This Look Right?</h1>
         <form method="POST" action="{{ url_for('confirm_receipt') }}">
-            <label>Company Name:</label>
-            <input type="text" name="company_name" value="{{ company_name }}" required>
+            <div class="form-group">
+                <label>Company Name:</label>
+                <input type="text" name="company_name" value="{{ company_name }}" required>
+            </div>
             
-            <label>Customer:</label>
-            <input type="text" name="customer" value="{{ customer }}" required>
+            <div class="form-group">
+                <label>Customer:</label>
+                <input type="text" name="customer" value="{{ customer }}" required>
+            </div>
             
-            <label>Order Date:</label>
-            <input type="text" name="order_date" value="{{ order_date }}" required>
+            <div class="form-group">
+                <label>Order Date:</label>
+                <input type="text" name="order_date" value="{{ order_date }}" required>
+            </div>
             
-            <label>Sales Person:</label>
-            <input type="text" name="sales_person" value="{{ sales_person }}" required>
+            <div class="form-group">
+                <label>Sales Person:</label>
+                <input type="text" name="sales_person" value="{{ sales_person }}" required>
+            </div>
             
-            <label>Invoice Number:</label>
-            <input type="text" name="rq_invoice" value="{{ rq_invoice }}" required>
+            <div class="form-group">
+                <label>Invoice Number:</label>
+                <input type="text" name="rq_invoice" value="{{ rq_invoice }}" required>
+            </div>
             
-            <label>Total Price:</label>
-            <input type="number" step="0.01" name="total_price" value="{{ total_price }}" required>
+            <div class="form-group">
+                <label>Total Price:</label>
+                <input type="number" step="0.01" name="total_price" value="{{ total_price }}" required>
+            </div>
             
-            <label>Accessory Prices (comma-separated):</label>
-            <input type="text" name="accessories_prices" value="{{ accessories_prices }}" required>
+            <div class="form-group">
+                <label>Accessory Prices (comma-separated):</label>
+                <input type="text" name="accessories_prices" value="{{ accessories_prices }}" required>
+            </div>
             
-            <label>Upgrades Count:</label>
-            <input type="number" name="upgrades_count" value="{{ upgrades_count }}" required>
+            <div class="form-group">
+                <label>Upgrades Count:</label>
+                <input type="number" name="upgrades_count" value="{{ upgrades_count }}" required>
+            </div>
             
-            <label>Activations Count:</label>
-            <input type="number" name="activations_count" value="{{ activations_count }}" required>
+            <div class="form-group">
+                <label>Activations Count:</label>
+                <input type="number" name="activations_count" value="{{ activations_count }}" required>
+            </div>
 
-            <label>PPP Present:</label>
-            <input type="checkbox" name="ppp_present" {% if ppp_present %}checked{% endif %}>
+            <div class="checkbox-group">
+                <input type="checkbox" id="ppp_present" name="ppp_present" {% if ppp_present %}checked{% endif %}>
+                <label for="ppp_present">PPP Present</label>
+            </div>
             
-            <label>Activation Fee Sum:</label>
-            <input type="number" step="0.01" name="activation_fee_sum" value="{{ activation_fee_sum }}" required>
+            <div class="form-group">
+                <label>Activation Fee Sum:</label>
+                <input type="number" step="0.01" name="activation_fee_sum" value="{{ activation_fee_sum }}" required>
+            </div>
             
-            <button type="submit" class="confirm-btn">Confirm</button>
+            <button type="submit" class="btn">Confirm</button>
         </form>
     </div>
 </body>

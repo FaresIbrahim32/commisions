@@ -2,28 +2,160 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Admin User Management</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Smart Touch Wireless - User Management</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f4f4f4;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        h1 {
+            color: #43B02A;
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 2rem;
+        }
+
+        .user-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .user-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1.5rem;
+        }
+
+        .user-info {
+            margin-bottom: 1rem;
+        }
+
+        .user-info p {
+            margin: 0.5rem 0;
+            color: #333;
+            font-size: 1rem;
+        }
+
+        .label {
+            font-weight: bold;
+            display: inline-block;
+            width: 100px;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        .status-approved {
+            background-color: #43B02A;
+            color: white;
+        }
+
+        .status-pending {
+            background-color: #ffc107;
+            color: #000;
+        }
+
+        .approval-form {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #eee;
+        }
+
+        .form-group {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            font-weight: bold;
+            color: #333;
+            min-width: 140px;
+        }
+
+        .form-group input {
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            flex: 1;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            background-color: #43B02A;
+            color: white;
+        }
+
+        .btn:hover {
+            background-color: #378522;
+        }
+
+        .username {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            font-family: monospace;
+            margin-left: 0.5rem;
+        }
+    </style>
 </head>
 <body>
     <h1>Manage Users</h1>
     
-    {% for user in users %}
-        <div>
-            <p>Name: {{ user['name'] }}</p>
-            <p>Email: {{ user['email'] }}</p>
-            <p>Phone: {{ user['phone'] }}</p>
-            <p>Approved: {{ 'Yes' if user['approved'] else 'No' }}</p>
-            
-            {% if not user['username'] %}
-                <form method="post" action="{{ url_for('approve_account', user_id=user['id']) }}">
-                    <label for="username">Assign Username:</label>
-                    <input type="text" name="username" required>
-                    <button type="submit">Approve and Assign Username</button>
-                </form>
-            {% else %}
-                <p>Username: {{ user['username'] }}</p>
-            {% endif %}
-        </div>
-    {% endfor %}
+    <div class="user-container">
+        {% for user in users %}
+            <div class="user-card">
+                <div class="user-info">
+                    <p><span class="label">Name:</span> {{ user['name'] }}</p>
+                    <p><span class="label">Email:</span> {{ user['email'] }}</p>
+                    <p><span class="label">Phone:</span> {{ user['phone'] }}</p>
+                    <p>
+                        <span class="label">Status:</span>
+                        <span class="status {% if user['approved'] %}status-approved{% else %}status-pending{% endif %}">
+                            {{ 'Approved' if user['approved'] else 'Pending' }}
+                        </span>
+                    </p>
+                    
+                    {% if not user['username'] %}
+                        <form class="approval-form" method="post" action="{{ url_for('approve_account', user_id=user['id']) }}">
+                            <div class="form-group">
+                                <label for="username">Assign Username:</label>
+                                <input type="text" name="username" id="username" required>
+                            </div>
+                            <button type="submit" class="btn">Approve and Assign Username</button>
+                        </form>
+                    {% else %}
+                        <p><span class="label">Username:</span> <span class="username">{{ user['username'] }}</span></p>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
 </body>
 </html>

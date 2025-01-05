@@ -2,25 +2,173 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Pending Approvals</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Smart Touch Wireless - Pending Approvals</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f4f4f4;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            color: #43B02A;
+            margin-bottom: 2rem;
+            font-size: 2rem;
+            text-align: center;
+        }
+
+        .pending-list {
+            list-style: none;
+            margin-bottom: 2rem;
+        }
+
+        .pending-item {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .approval-form {
+            background: #f8f9fa;
+            padding: 2rem;
+            border-radius: 5px;
+            margin-top: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group p {
+            color: #333;
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #43B02A;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            color: white;
+        }
+
+        .btn-approve {
+            background-color: #43B02A;
+        }
+
+        .btn-approve:hover {
+            background-color: #378522;
+        }
+
+        .info-label {
+            font-weight: bold;
+            min-width: 80px;
+            display: inline-block;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+
+            .container {
+                padding: 1.5rem;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .pending-item {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
 </head>
 <body>
-    <h2>Accounts Pending Approval</h2>
-    <ul>
-        {% for user in users %}
-            <li>{{ user[0] }} - <form action="{{ url_for('approve_account', username=user[0]) }}" method="post">
-                <button type="submit">Approve</button>
-            </form></li>
-        {% endfor %}
-    </ul>
-    <form action="{{ url_for('approve_user_account', user_id=user_id) }}" method="post">
-        <p>Name: {{ user[1] }}</p>
-        <p>Email: {{ user[2] }}</p>
-        <p>Phone: {{ user[3] }}</p>
-        <label for="username">Assign Username:</label>
-        <input type="text" name="username" required>
-        <input type="hidden" name="user_id" value="{{ user[0] }}">
-        <button type="submit">Approve Account</button>
-    </form>
+    <div class="container">
+        <h2>Accounts Pending Approval</h2>
+        
+        <ul class="pending-list">
+            {% for user in users %}
+                <li class="pending-item">
+                    <span>{{ user[0] }}</span>
+                    <form action="{{ url_for('approve_account', username=user[0]) }}" method="post">
+                        <button type="submit" class="btn btn-approve">Approve</button>
+                    </form>
+                </li>
+            {% endfor %}
+        </ul>
+
+        <form class="approval-form" action="{{ url_for('approve_user_account', user_id=user_id) }}" method="post">
+            <div class="form-group">
+                <p><span class="info-label">Name:</span> {{ user[1] }}</p>
+            </div>
+            <div class="form-group">
+                <p><span class="info-label">Email:</span> {{ user[2] }}</p>
+            </div>
+            <div class="form-group">
+                <p><span class="info-label">Phone:</span> {{ user[3] }}</p>
+            </div>
+            <div class="form-group">
+                <label for="username">Assign Username:</label>
+                <input type="text" name="username" id="username" class="form-control" required>
+            </div>
+            <input type="hidden" name="user_id" value="{{ user[0] }}">
+            <button type="submit" class="btn btn-approve">Approve Account</button>
+        </form>
+    </div>
 </body>
 </html>
