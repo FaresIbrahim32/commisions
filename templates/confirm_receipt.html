@@ -2,129 +2,185 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Confirm Receipt Details</title>
     <style>
+        *, *:before, *:after {
+            box-sizing: inherit;
+        }
+
         body {
             font-family: Arial, sans-serif;
             background-color: #e6e6e6;
             margin: 0;
             padding: 20px;
+            box-sizing: border-box;
         }
+
         .main-container {
+            width: 95%;
             max-width: 1000px;
             margin: 0 auto;
         }
+
         h1 {
             text-align: center;
             color: #333;
             margin-bottom: 30px;
         }
+
         .section-container {
             background: white;
-            padding: 20px;
+            padding: 25px;
             border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
             margin-bottom: 20px;
         }
+
         .row {
             display: flex;
             gap: 20px;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
+
         .field-group {
             flex: 1;
             margin-bottom: 15px;
         }
+
         .center-field {
             width: 50%;
             margin: 0 auto;
         }
-        .bottom-sections {
-            display: flex;
+
+        /* Updated sections layout */
+        .sections-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
             gap: 20px;
             margin-bottom: 20px;
         }
+
         .devices-section, .accessories-section {
-            flex: 1;
             background: white;
-            padding: 20px;
+            padding: 25px;
             border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
+
         label {
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
             font-weight: bold;
             color: #333;
         }
-        input {
+
+        input, select {
             width: 100%;
-            padding: 8px;
+            padding: 10px;
             border: 1px solid #ddd;
             border-radius: 4px;
             box-sizing: border-box;
+            font-size: 14px;
         }
-        input[type="checkbox"] {
-            width: auto;
-            margin-right: 10px;
-        }
-        .checkbox-group {
-            display: flex;
-            align-items: center;
-        }
-        .checkbox-group label {
-            display: inline;
-            margin: 0;
-        }
-        .confirm-btn {
-            width: 100%;
-            padding: 12px;
-            background-color: #60a82c;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            margin-top: 20px;
-        }
-        .confirm-btn:hover {
-            background-color: #4e8725;
-        }
-        .section-title {
-            font-size: 18px;
-            color: #333;
-            margin-bottom: 15px;
-            text-align: center;
-        }
+
         .input-with-verify {
             display: flex;
-            gap: 10px;
             align-items: center;
+            gap: 15px;
         }
-        select {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
+
         .verify-checkbox {
             display: flex;
             align-items: center;
             gap: 5px;
             white-space: nowrap;
         }
-        .mismatch-warning {
-            color: #dc3545;
-            font-size: 0.9em;
-            margin-top: 5px;
-            display: none;
-        }
+
         .verify-checkbox input[type="checkbox"] {
             width: 20px;
             height: 20px;
         }
-        
+
+        /* Updated table styles */
+        .device-pairs {
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            background: white;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f8f8f8;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .confirm-btn {
+            width: 100%;
+            padding: 15px;
+            background-color: #60a82c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+
+        .confirm-btn:hover {
+            background-color: #4e8725;
+        }
+
+        .section-title {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .mismatch-warning {
+            color: #dc3545;
+            font-size: 0.9em;
+            margin-top: 8px;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .sections-container {
+                grid-template-columns: 1fr;
+            }
+
+            .row {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .center-field {
+                width: 100%;
+            }
+
+            .input-with-verify {
+                flex-wrap: wrap;
+            }
+
+            table {
+                display: block;
+                overflow-x: auto;
+            }
+        }
     </style>
 </head>
 <body>
@@ -133,7 +189,6 @@
         <form method="POST" action="{{ url_for('confirm_receipt') }}">
             <!-- Customer Information Section -->
             <div class="section-container">
-                <!-- Company Name and Sales Person row -->
                 <div class="row">
                     <div class="field-group">
                         <label>Store Location:</label>
@@ -158,8 +213,7 @@
                         <div class="mismatch-warning">Note: This differs from your account name ({{ logged_in_user }})</div>
                     </div>
                 </div>
-                
-                <!-- Order Date and Customer row -->
+
                 <div class="row">
                     <div class="field-group">
                         <label>Order Date:</label>
@@ -171,7 +225,6 @@
                     </div>
                 </div>
 
-                <!-- Centered Invoice Number -->
                 <div class="center-field">
                     <label>Invoice Number:</label>
                     <div class="input-with-verify">
@@ -184,49 +237,49 @@
                 </div>
             </div>
 
-            <!-- Devices Section -->
-            <div class="devices-section">
-                <div class="section-title">Devices</div>
-                
-                <div class="field-group">
-                    <label>Activations Count:</label>
-                    <input type="number" name="activations_count" value="{{ activations_count }}" required>
+            <!-- Devices and Accessories Sections -->
+            <div class="sections-container">
+                <!-- Devices Section -->
+                <div class="devices-section">
+                    <div class="section-title">Devices</div>
+                    <div class="field-group">
+                        <label>Activations Count:</label>
+                        <input type="number" name="activations_count" value="{{ activations_count }}" required>
+                    </div>
+
+                    <div class="field-group">
+                        <label>Upgrades Count:</label>
+                        <input type="number" name="upgrades_count" value="{{ upgrades_count }}" required>
+                    </div>
+
+                    <div class="field-group">
+                        <label>Activation Fee Sum:</label>
+                        <input type="number" step="0.01" name="activation_fee_sum" value="{{ activation_fee_sum }}" required>
+                    </div>
+
+                    {% if imei_iccid_pairs %}
+                    <div class="device-pairs">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Device #</th>
+                                    <th>IMEI</th>
+                                    <th>ICCID</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for pair in imei_iccid_pairs %}
+                                <tr>
+                                    <td>{{ loop.index }}</td>
+                                    <td>{{ pair.imei }}</td>
+                                    <td>{{ pair.iccid }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% endif %}
                 </div>
-            
-                <div class="field-group">
-                    <label>Upgrades Count:</label>
-                    <input type="number" name="upgrades_count" value="{{ upgrades_count }}" required>
-                </div>
-            
-                {% if imei_iccid_pairs %}
-                <div class="device-pairs">
-                    <table style="width: 100%; margin-top: 15px;">
-                        <thead>
-                            <tr>
-                                <th>Device #</th>
-                                <th>IMEI</th>
-                                <th>ICCID</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for pair in imei_iccid_pairs %}
-                            <tr>
-                                <td>{{ loop.index }}</td>
-                                <td>{{ pair.imei }}</td>
-                                <td>{{ pair.iccid }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                {% endif %}
-            </div>
-    
-    <div class="field-group">
-        <label>Activation Fee Sum:</label>
-        <input type="number" step="0.01" name="activation_fee_sum" value="{{ activation_fee_sum }}" required>
-    </div>
-</div>
 
                 <!-- Accessories Section -->
                 <div class="accessories-section">

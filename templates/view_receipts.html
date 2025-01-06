@@ -101,11 +101,11 @@
         <h1>Stored Receipts</h1>
         <table>
             <tr>
+                <th>Invoice Number</th>
                 <th>Company Name</th>
                 <th>Customer</th>
                 <th>Order Date</th>
                 <th>Sales Person</th>
-                <th>Invoice Number</th>
                 <th>Accessories Total</th>
                 <th>Upgrades</th>
                 <th>Activations</th>
@@ -115,11 +115,11 @@
             </tr>
             {% for receipt in receipts %}
             <tr>
+                <td><a href="{{ url_for('receipt_details', rq_invoice=receipt[5]) }}" style="color: #60a82c; text-decoration: none; font-weight: bold;">{{ receipt[5] }}</a></td>
                 <td>{{ receipt[1] }}</td>
                 <td>{{ receipt[2] }}</td>
                 <td>{{ receipt[3] }}</td>
                 <td>{{ receipt[4] }}</td>
-                <td>{{ receipt[5] }}</td>
                 <td class="money">${{ "%.2f"|format(receipt[6] or 0) }}</td>
                 <td>{{ receipt[8] }}</td>
                 <td>{{ receipt[9] }}</td>

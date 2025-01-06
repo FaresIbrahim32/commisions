@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Commission</title>
     <style>
         body {
@@ -9,58 +10,88 @@
             background-color: #f4f4f4;
             margin: 0;
             padding: 20px;
+            box-sizing: border-box;
         }
+        
+        *, *:before, *:after {
+            box-sizing: inherit;
+        }
+        
         .container {
-            max-width: 800px;
+            width: 95%;
+            max-width: 1200px;
             margin: 0 auto;
             background: #ffffff;
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         }
+        
         h1 {
             text-align: center;
             color: #333;
             font-size: 24px;
             margin-bottom: 20px;
         }
+        
+        /* Table styles */
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            margin-bottom: 20px;
+        }
+        
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 20px;
+            white-space: nowrap;
+            min-width: 600px; /* Ensures table doesn't get too squeezed */
         }
+        
         th {
             background-color: #60a82c;
             color: white;
-            padding: 10px;
+            padding: 12px;
             text-align: center;
+            font-size: 14px;
+            white-space: nowrap;
         }
+        
         td {
-            padding: 10px;
+            padding: 12px;
             text-align: center;
             border: 1px solid #ddd;
+            font-size: 14px;
         }
+        
+        /* Tier progress styles */
         .tier-container {
-            margin-top: 20px;
+            margin-top: 30px;
+            padding: 0 10px;
         }
+        
         .tier-header {
             text-align: center;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             font-size: 18px;
             color: #333;
         }
+        
         .progress-container {
             width: 100%;
             background-color: #eee;
-            height: 20px;
-            border-radius: 10px;
-            margin: 10px 0;
+            height: 24px;
+            border-radius: 12px;
+            margin: 15px 0;
         }
+        
         .progress-bar {
             height: 100%;
             background-color: #60a82c;
-            border-radius: 10px;
+            border-radius: 12px;
+            transition: width 0.3s ease;
         }
+        
         .tier-markers {
             display: flex;
             justify-content: space-between;
@@ -68,19 +99,24 @@
             color: #666;
             font-size: 14px;
         }
+        
         .tier-info {
             text-align: center;
-            margin-top: 10px;
+            margin-top: 15px;
             color: #333;
+            font-size: 16px;
         }
+        
         .button-container {
             display: flex;
             justify-content: flex-end;
             gap: 10px;
-            margin-top: 20px;
+            margin-top: 30px;
+            flex-wrap: wrap;
         }
+        
         .nav-button {
-            padding: 10px 20px;
+            padding: 12px 24px;
             background-color: #60a82c;
             color: white;
             border: none;
@@ -88,37 +124,74 @@
             cursor: pointer;
             text-decoration: none;
             text-align: center;
+            font-size: 14px;
+            white-space: nowrap;
         }
+        
         .nav-button:hover {
             background-color: #4e8725;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                width: 100%;
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 20px;
+            }
+            
+            .tier-markers {
+                font-size: 12px;
+            }
+            
+            .button-container {
+                justify-content: center;
+            }
+            
+            .nav-button {
+                padding: 10px 20px;
+                font-size: 13px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>My Commission</h1>
+        <h1>{% if is_admin %}Team Performance{% else %}My Commission{% endif %}</h1>
         
-        <table>
-            <tr>
-                <th>Username</th>
-                <th>Name</th>
-                <th>Activations</th>
-                <th>Upgrades</th>
-                <th>Total Devices</th>
-                <th>Accessories</th>
-            </tr>
-            {% for row in commission_data %}
-            <tr>
-                <td>{{ row[0] }}</td>
-                <td>{{ row[1] }}</td>
-                <td>{{ row[2] }}</td>
-                <td>{{ row[3] }}</td>
-                <td>{{ row[4] }}</td>
-                <td>${{ "%.2f"|format(row[5]) }}</td>
-            </tr>
-            {% endfor %}
-        </table>
+        <div class="table-container">
+            <table>
+                <tr>
+                    <th>Username</th>
+                    <th>Name</th>
+                    <th>Activations</th>
+                    <th>Upgrades</th>
+                    <th>Total Devices</th>
+                    <th>Accessories</th>
+                    <th>Current Tier</th>
+                </tr>
+                {% for row in commission_data %}
+                <tr>
+                    <td>{{ row[0] }}</td>
+                    <td>{{ row[1] }}</td>
+                    <td>{{ row[2] }}</td>
+                    <td>{{ row[3] }}</td>
+                    <td>{{ row[4] }}</td>
+                    <td>${{ "%.2f"|format(row[5]) }}</td>
+                    <td>{{ row[6] }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
 
+        {% if not is_admin %}
         <div class="tier-container">
             <div class="tier-header">Accessory Sales Tier</div>
             <div class="progress-container">
@@ -138,10 +211,13 @@
                 {% endif %}
             </div>
         </div>
+        {% endif %}
 
         <div class="button-container">
             <a href="{{ url_for('non_admin_dashboard') }}" class="nav-button">Home</a>
+            {% if not is_admin %}
             <a href="{{ url_for('upload_pdf') }}" class="nav-button">Add Sale</a>
+            {% endif %}
             <a href="{{ url_for('logout') }}" class="nav-button">Logout</a>
         </div>
     </div>

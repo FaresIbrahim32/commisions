@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Receipt Details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            font-size: 26px;
+            margin-bottom: 20px;
+        }
+        .info-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 5px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .label {
+            font-weight: bold;
+            color: #666;
+        }
+        .value {
+            color: #333;
+        }
+        .money {
+            font-family: 'Courier New', monospace;
+            text-align: right;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #60a82c;
+            color: #ffffff;
+        }
+        .back-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #60a82c;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 20px;
+            text-align: center;
+        }
+        .back-btn:hover {
+            background-color: #4e8725;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Receipt Details</h1>
+        
+        <div class="info-section">
+            <h2 style="color: #60a82c; margin-bottom: 15px;">Main Information</h2>
+            <div class="info-row">
+                <span class="label">Invoice Number: </span>
+                <span class="value">{{ receipt[5] }}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Store:</span>
+                <span class="value">{{ receipt[1] }}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Customer:</span>
+                <span class="value">{{ receipt[2] }}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Order Date:</span>
+                <span class="value">{{ receipt[3] }}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Sales Person:</span>
+                <span class="value">{{ receipt[4] }}</span>
+            </div>
+        </div>
+
+        <div class="info-section">
+            <h2 style="color: #60a82c; margin-bottom: 15px;">Accessories</h2>
+            <div class="info-row">
+                <span class="label">Accessories Total:</span>
+                <span class="value money">${{ "%.2f"|format(receipt[6] or 0) }}</span>
+            </div>
+        </div>
+
+        <div class="info-section">
+            <h2 style="color: #60a82c; margin-bottom: 15px;">Device Information</h2>
+            <div class="info-row">
+                <span class="label">Upgrades:</span>
+                <span class="value">{{ receipt[8] }}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Activations:</span>
+                <span class="value">{{ receipt[9] }}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Activation Fee:</span>
+                <span class="value money">${{ "%.2f"|format(receipt[11] or 0) }}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">PPP Present:</span>
+                <span class="value">{{ 'Yes' if receipt[10] else 'No' }}</span>
+            </div>
+        </div>
+
+        {% if imei_iccid_pairs %}
+        <div class="info-section">
+            <h2 style="color: #60a82c; margin-bottom: 15px;">IMEI/ICCID Pairs</h2>
+            <table>
+                <tr>
+                    <th>IMEI</th>
+                    <th>ICCID</th>
+                </tr>
+                {% for pair in imei_iccid_pairs %}
+                <tr>
+                    <td>{{ pair.imei }}</td>
+                    <td>{{ pair.iccid }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+        {% endif %}
+
+        <a href="{{ url_for('view_receipts') }}" class="back-btn">Back to Receipts</a>
+    </div>
+    <div class="info-section">
+        <h2 style="color: #60a82c; margin-bottom: 15px;">IMEI/ICCID Information</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>IMEI</th>
+                    <th>ICCID</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if imei_iccid_pairs %}
+                    {% for pair in imei_iccid_pairs %}
+                        <tr>
+                            <td>{{ pair.imei }}</td>
+                            <td>{{ pair.iccid }}</td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="2" style="text-align: center;">No IMEI/ICCID pairs found</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

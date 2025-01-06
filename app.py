@@ -4,16 +4,22 @@ from flask_bcrypt import Bcrypt
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from datetime import timedelta
+from typing import List, Dict, Tuple, Optional
 import sqlite3
 import PyPDF2
 import math
 import string
 import random
 import os
+import json
+import io
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
-app.permanent_session_lifetime = timedelta(minutes=15)
+app.permanent_session_lifetime = timedelta(minutes=60)
+app.config['SESSION_COOKIE_SECURE'] = True  # For HTTPS
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 
 bcrypt = Bcrypt(app)
 limiter = Limiter(key_func=get_remote_address)
@@ -24,7 +30,34 @@ os.makedirs('/data', exist_ok=True)  # Create the directory if it doesn't exist
 
 def init_db():
     db = get_db()
+
+    try:
+        db.execute('ALTER TABLE parsed_receipts ADD COLUMN imei_iccid_pairs TEXT')
+        db.commit()
+    except sqlite3.OperationalError:
+        # Column might already exist
+        pass
+
+def update_db():
+    db = get_db()
+    cursor = db.cursor()
     
+    # Check if column exists
+    cursor.execute("PRAGMA table_info(parsed_receipts)")
+    columns = cursor.fetchall()
+    column_names = [column[1] for column in columns]
+    
+    # Add column if it doesn't exist
+    if 'imei_iccid_pairs' not in column_names:
+        try:
+            cursor.execute('ALTER TABLE parsed_receipts ADD COLUMN imei_iccid_pairs TEXT')
+            db.commit()
+            print("Added imei_iccid_pairs column")
+        except sqlite3.OperationalError as e:
+            print(f"Error adding column: {e}")
+    else:
+        print("Column already exists")
+
     # Create the users table
     db.execute('''
         CREATE TABLE IF NOT EXISTS users(
@@ -148,6 +181,9 @@ def delete_receipt(receipt_id):
     return redirect(url_for('view_receipts'))
 
 def round_up(value, decimals=2):
+    factor = 10 ** decimals
+    return math.ceil(value * factor) / factor
+
 # Database connection function
 def get_db():
     if 'db' not in g:
@@ -377,51 +413,46 @@ def logout():
     session.pop('admin', None)
     return redirect(url_for('login'))
 
-def extract_imei_from_pdf(pdf_file):
-    reader = PyPDF2.PdfReader(pdf_file)
-    pdf_text = ""
+def extract_imei_iccid_pairs(text):
+    """
+    Extract IMEI and ICCID pairs in order of appearance in the document.
+    """
+    pairs = []
+    lines = text.split('\n')
+    current_imei = None
     
-    for page in reader.pages:
-        pdf_text += page.extract_text()
+    for line in lines:
+        if 'IMEI:' in line:
+            imei_match = re.search(r'IMEI:(\d{15})', line)
+            if imei_match:
+                current_imei = imei_match.group(1)
+        elif 'ICCID:' in line and current_imei:
+            iccid_match = re.search(r'ICCID:(\d{20})', line)
+            if iccid_match:
+                iccid = iccid_match.group(1)
+                pairs.append({
+                    'imei': current_imei,
+                    'iccid': iccid
+                })
+                current_imei = None  # Reset current_imei after creating a pair
     
-    # Clean up text if needed
-    pdf_text = re.sub(r'1@\$[0-9.]+\s*\$[0-9.]+', '', pdf_text)
-    
-    # Extract IMEI numbers
-    imei_pattern = r'IMEI:(\d{15})'
-    imei_matches = re.findall(imei_pattern, pdf_text)
-    
-    return imei_matches
+    return pairs
 
-def extract_iccid_from_pdf(pdf_file):
-    reader = PyPDF2.PdfReader(pdf_file)
-    pdf_text = ""
+def pair_imei_iccid(imeis: List[str], iccids: List[str]) -> List[Dict[str, str]]:
+    """Create pairs of IMEI and ICCID numbers preserving order."""
+    pairs = []
     
-    for page in reader.pages:
-        pdf_text += page.extract_text()
-    
-    # Clean up text if needed
-    pdf_text = re.sub(r'1@\$[0-9.]+\s*\$[0-9.]+', '', pdf_text)
-    
-    # Extract ICCID numbers
-    iccid_pattern = r'ICCID:(\d{20})'
-    iccid_matches = re.findall(iccid_pattern, pdf_text)
-    
-    return iccid_matches
-
-def pair_imei_iccid(imeis, iccids):
-    # Create pairs, ensuring we don't exceed the shorter list
-    imei_iccid_pairs = []
+    # Create pairs while maintaining order
     for i in range(min(len(imeis), len(iccids))):
-        imei_iccid_pairs.append({
+        pairs.append({
             'imei': imeis[i],
             'iccid': iccids[i]
         })
     
-    return imei_iccid_pairs
+    return pairs
 
-# Function to extract info from PDF
-def extract_info_from_pdf(pdf_file):
+def extract_info_from_pdf(pdf_file) -> Tuple:
+    """Extract all information from PDF file."""
     reader = PyPDF2.PdfReader(pdf_file)
     pdf_text = ""
     
@@ -429,109 +460,95 @@ def extract_info_from_pdf(pdf_file):
         pdf_text += page.extract_text()
 
     # Regular expression patterns
-    imei_pattern = r'IMEI:\d+'
     company_pattern = r"Sale\nR\d+\n(\d{3}:\s[A-Za-z\s]+)"
     customer_pattern = r"Customer\s*(.*?)(?:\n|\s*\()"
     order_date_pattern = r"Order Date\s*(\d{1,2}-\w{3}-\d{4}\s*\d{1,2}:\d{2}:\d{2}\s*\w*)"
     sales_person_pattern = r"Tendered By:\s*(.*?)(?:\n|$)"
     rq_invoice_pattern = r"Sale\n(R\d+)\n"
-
-    # Accessory pattern with explicit SKU formats
-    accessory_pattern = r'([A-Z0-9]+)\n(.*?)\n(?:.*?@\$(\d+\.\d+)).*?Item Total\s+\$(\d+\.\d+)'
     
-    # Pattern to match IMEI numbers
-    imeis = extract_imei_from_pdf(pdf_file)
-    iccids = extract_iccid_from_pdf(pdf_file)
+    # Get IMEI/ICCID pairs
+    imei_iccid_pairs = extract_imei_iccid_pairs(pdf_text)
     
-    imei_iccid_pairs = pair_imei_iccid(imeis, iccids)
-    
-    # Define what SKUs or descriptions are NOT accessories
-    non_accessory_identifiers = [
-        'DEFBYOD',      # Device
-        'UNLCOR',       # Plan
-        'UNLMORE',      # Plan
-        'ACTIVATION',
-        '%IMEI%',   # Fee
-        'ICCID:',       # SIM
-        'SIM',          # SIM card
-        'STHN',         # SIM
-        'SSGN',         # SIM
-        '55UNL',        # Plan
-        '60UNL',        # Plan
-    ]
-    
+    # Other patterns
     upgrades_pattern = r"\bUpgrade Fee\b"
     activations_pattern = r"\bActivation Fee\b"
     ppp_pattern = r"\bLease\b"
     activation_fee_pattern = r"Fee\s*\d\s*@\$\s*([\d.]+)"
 
-    # Extract accessories using new pattern
-    accessory_matches = re.finditer(accessory_pattern, pdf_text, re.DOTALL)
-    accessory_prices = []
-    
-    for match in accessory_matches:
-        sku = match.group(1)
-        description = match.group(2).strip()
-        final_price = float(match.group(4))
-        
-        # Skip if it contains an IMEI number
-        if re.search(imei_pattern, description):
-            continue
-        
-        # Skip if it matches any non-accessory identifier
-        if any(identifier in sku or identifier in description 
-               for identifier in non_accessory_identifiers):
-            continue
-            
-        # Only add to accessories if it's a genuine accessory
-        accessory_prices.append(round_up(final_price, 2))
-
-    total_price = round_up(sum(accessory_prices), 2)
-
-    # Extract other data
+    # Extract data
     company_name = re.search(company_pattern, pdf_text, re.DOTALL)
     customer = re.search(customer_pattern, pdf_text, re.DOTALL)
     order_date = re.search(order_date_pattern, pdf_text, re.DOTALL)
     sales_person = re.search(sales_person_pattern, pdf_text, re.DOTALL)
     rq_invoice = re.search(rq_invoice_pattern, pdf_text, re.DOTALL)
-
+    
+    # Count occurrences
     upgrades_count = len(re.findall(upgrades_pattern, pdf_text, re.IGNORECASE))
     activations_count = len(re.findall(activations_pattern, pdf_text, re.IGNORECASE))
     ppp_present = bool(re.search(ppp_pattern, pdf_text, re.IGNORECASE))
+    
+    # Calculate activation fees
     activation_fees = re.findall(activation_fee_pattern, pdf_text)
-    activation_fee_sum = round_up(sum(float(fee) for fee in activation_fees), 2)
+    activation_fee_sum = round(sum(float(fee) for fee in activation_fees), 2)
+
+    # Calculate accessories (moved to separate function)
+    total_price, accessory_prices = calculate_accessories(pdf_text)
 
     return (
-        company_name.group(1).strip() if company_name else "N/A", 
+        company_name.group(1).strip() if company_name else "N/A",
         customer.group(1).strip() if customer else "N/A",
         order_date.group(1).strip() if order_date else "N/A",
         sales_person.group(1).strip() if sales_person else "N/A",
         rq_invoice.group(1).strip() if rq_invoice else "N/A",
-        total_price, 
+        total_price,
         accessory_prices,
         upgrades_count,
         activations_count,
         ppp_present,
         imei_iccid_pairs,
-        activation_fee_sum)
+        activation_fee_sum
+    )
+
+def calculate_accessories(pdf_text: str) -> Tuple[float, List[float]]:
+    """Calculate accessory prices from PDF text."""
+    accessory_pattern = r'([A-Z0-9]+)\n(.*?)\n(?:.*?@\$(\d+\.\d+)).*?Item Total\s+\$(\d+\.\d+)'
+    non_accessory_identifiers = [
+        'DEFBYOD', 'UNLCOR', 'UNLMORE', 'ACTIVATION',
+        'IMEI:', 'ICCID:', 'SIM', 'STHN', 'SSGN',
+        '55UNL', '60UNL'
+    ]
+    
+    accessory_prices = []
+    for match in re.finditer(accessory_pattern, pdf_text, re.DOTALL):
+        sku = match.group(1)
+        description = match.group(2).strip()
+        final_price = float(match.group(4))
+        
+        if not any(identifier in sku or identifier in description 
+                  for identifier in non_accessory_identifiers):
+            accessory_prices.append(round(final_price, 2))
+    
+    total_price = round(sum(accessory_prices), 2)
+    return total_price, accessory_prices
 
 # PDF upload page
 @app.route('/upload', methods=['GET', 'POST'])
 def upload_pdf():
+    if 'logged_in' not in session:
+        return redirect(url_for('login'))
+
     if request.method == 'POST' and 'pdf' in request.files:
         uploaded_file = request.files['pdf']
         if uploaded_file and uploaded_file.filename.endswith('.pdf'):
-            # Get the text content
+            # Store PDF text content
             reader = PyPDF2.PdfReader(uploaded_file)
-            pdf_text = ""
-            for page in reader.pages:
-                pdf_text += page.extract_text()
-            
-            # Store the text in session
+            pdf_text = "".join(page.extract_text() for page in reader.pages)
             session['pdf_text'] = pdf_text
             
-            # Your existing parsing code...
-            company_name, customer, order_date, sales_person, rq_invoice, total_price, accessories_prices, upgrades_count, activations_count, ppp_present, imei_iccid_pairs, activation_fee_sum = extract_info_from_pdf(uploaded_file)
+            # Parse PDF data
+            (company_name, customer, order_date, sales_person, rq_invoice, 
+             total_price, accessories_prices, upgrades_count, activations_count, 
+             ppp_present, pairs, activation_fee_sum) = extract_info_from_pdf(uploaded_file)
             
             session['parsed_data'] = {
                 'company_name': company_name,
@@ -545,7 +562,7 @@ def upload_pdf():
                 'activations_count': activations_count,
                 'ppp_present': ppp_present,
                 'activation_fee_sum': activation_fee_sum,
-                'imei_iccid_pairs': imei_iccid_pairs
+                'imei_iccid_pairs': pairs
             }
             
             return redirect(url_for('confirm_receipt'))
@@ -612,11 +629,10 @@ def confirm_receipt():
     if 'logged_in' not in session:
         return redirect(url_for('login') + '?session_expired=true')
     
-    if 'parsed_data' not in session or 'pdf_text' not in session:  # Add check for pdf_text
+    if 'parsed_data' not in session or 'pdf_text' not in session:
         return redirect(url_for('upload_pdf'))
     
-
-    # Get logged in user's name (using name field, not username)
+    # Get logged in user's name
     db = get_db()
     cursor = db.cursor()
     cursor.execute("SELECT name FROM users WHERE id = ?", (session['user_id'],))
@@ -624,31 +640,68 @@ def confirm_receipt():
     logged_in_user = user[0] if user else None
     
     if request.method == 'POST':
-        print(f"Current user_id in session: {session.get('user_id')}")
-        
-        company_name = request.form.get('company_name', 'N/A')
-        customer = request.form.get('customer', 'N/A')
-        order_date = request.form.get('order_date', 'N/A')
-        sales_person = request.form.get('sales_person', 'N/A')
-        rq_invoice = request.form.get('rq_invoice', 'N/A')
-        total_price = float(request.form.get('total_price', 0))
-        accessories_prices = request.form.get('accessories_prices', '')
-        upgrades_count = int(request.form.get('upgrades_count', 0))
-        activations_count = int(request.form.get('activations_count', 0))
-        ppp_present = 'ppp_present' in request.form
-        activation_fee_sum = float(request.form.get('activation_fee_sum', 0))
-
         user_id = session.get('user_id')
         if not user_id:
-            print("No user_id found in session!")
             return redirect(url_for('login'))
-
-        db = get_db()
-        cursor = db.cursor()
         
-        print(f"About to insert receipt for user_id: {user_id}")
-        print(f"Data to insert: {(company_name, customer, order_date, sales_person, rq_invoice, total_price, accessories_prices, upgrades_count, activations_count, ppp_present, activation_fee_sum, user_id)}")
+        # Get form data
+        form_data = {
+            'company_name': request.form.get('company_name', 'N/A'),
+            'customer': request.form.get('customer', 'N/A'),
+            'order_date': request.form.get('order_date', 'N/A'),
+            'sales_person': request.form.get('sales_person', 'N/A'),
+            'rq_invoice': request.form.get('rq_invoice', 'N/A'),
+            'total_price': float(request.form.get('total_price', 0)),
+            'accessories_prices': request.form.get('accessories_prices', ''),
+            'upgrades_count': int(request.form.get('upgrades_count', 0)),
+            'activations_count': int(request.form.get('activations_count', 0)),
+            'ppp_present': 'ppp_present' in request.form,
+            'activation_fee_sum': float(request.form.get('activation_fee_sum', 0))
+        }
         
+        # Get IMEI/ICCID pairs from session and convert to JSON string
+        imei_iccid_pairs = session.get('parsed_data', {}).get('imei_iccid_pairs', [])
+        imei_iccid_json = json.dumps(imei_iccid_pairs)
+        
+        cursor.execute('''
+            INSERT INTO parsed_receipts (
+                company_name, customer, order_date, sales_person, rq_invoice, 
+                total_price, accessory_prices, upgrades_count, activations_count, 
+                ppp_present, activation_fee_sum, user_id, imei_iccid_pairs
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (
+            form_data['company_name'], form_data['customer'], form_data['order_date'],
+            form_data['sales_person'], form_data['rq_invoice'], form_data['total_price'],
+            form_data['accessories_prices'], form_data['upgrades_count'],
+            form_data['activations_count'], form_data['ppp_present'],
+            form_data['activation_fee_sum'], user_id, imei_iccid_json
+        ))
+        
+        db.commit()
+        session.pop('parsed_data', None)
+        return redirect(url_for('view_receipts'))
+    
+    if request.method == 'POST':
+        user_id = session.get('user_id')
+        if not user_id:
+            return redirect(url_for('login'))
+        
+        # Get form data
+        form_data = {
+            'company_name': request.form.get('company_name', 'N/A'),
+            'customer': request.form.get('customer', 'N/A'),
+            'order_date': request.form.get('order_date', 'N/A'),
+            'sales_person': request.form.get('sales_person', 'N/A'),
+            'rq_invoice': request.form.get('rq_invoice', 'N/A'),
+            'total_price': float(request.form.get('total_price', 0)),
+            'accessories_prices': request.form.get('accessories_prices', ''),
+            'upgrades_count': int(request.form.get('upgrades_count', 0)),
+            'activations_count': int(request.form.get('activations_count', 0)),
+            'ppp_present': 'ppp_present' in request.form,
+            'activation_fee_sum': float(request.form.get('activation_fee_sum', 0))
+        }
+        
+        # Insert into database
         cursor.execute('''
             INSERT INTO parsed_receipts (
                 company_name, customer, order_date, sales_person, rq_invoice, 
@@ -656,48 +709,25 @@ def confirm_receipt():
                 ppp_present, activation_fee_sum, user_id
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (
-            company_name, customer, order_date, sales_person, rq_invoice, 
-            total_price, accessories_prices, upgrades_count, activations_count, 
-            ppp_present, activation_fee_sum, user_id
+            form_data['company_name'], form_data['customer'], form_data['order_date'],
+            form_data['sales_person'], form_data['rq_invoice'], form_data['total_price'],
+            form_data['accessories_prices'], form_data['upgrades_count'],
+            form_data['activations_count'], form_data['ppp_present'],
+            form_data['activation_fee_sum'], user_id
         ))
         
         db.commit()
-        
-        cursor.execute("SELECT * FROM parsed_receipts WHERE user_id = ? ORDER BY id DESC LIMIT 1", (user_id,))
-        last_insert = cursor.fetchone()
-        print(f"Last inserted record: {last_insert}")
-        
         session.pop('parsed_data', None)
         return redirect(url_for('view_receipts'))
     
-    if request.method == 'GET':
-        pdf_text = session['pdf_text']  # Get the stored PDF text
-        
-        def find_imei_iccid_pairs(text):
-            imei_iccid_pairs = []
-            lines = text.split('\n')
-            current_imei = None
-            current_device = {}
-            
-            for line in lines:
-                if 'IMEI:' in line:
-                    current_imei = line.split('IMEI:')[1].strip()
-                    current_device = {'imei': current_imei}
-                elif 'ICCID:' in line and current_imei:
-                    current_iccid = line.split('ICCID:')[1].strip()
-                    current_device['iccid'] = current_iccid
-                    if current_device not in imei_iccid_pairs:
-                        imei_iccid_pairs.append(dict(current_device))
-                    current_device = {}
-                    current_imei = None
-            
-            return imei_iccid_pairs
+    # GET request
+    parsed_data = session['parsed_data']
+    pdf_text = session['pdf_text']
+    
+    parsed_data['imei_iccid_pairs'] = extract_imei_iccid_pairs(pdf_text)
+    parsed_data['logged_in_user'] = logged_in_user
 
-        parsed_data = session['parsed_data']
-        parsed_data['imei_iccid_pairs'] = find_imei_iccid_pairs(pdf_text)
-        parsed_data['logged_in_user'] = logged_in_user
-
-        return render_template('confirm_receipt.html', **parsed_data)
+    return render_template('confirm_receipt.html', **parsed_data)
 
 @app.route('/view_receipts')
 def view_receipts():
@@ -711,16 +741,69 @@ def view_receipts():
     cursor.execute("SELECT * FROM users WHERE id = ?", (session['user_id'],))
     user = cursor.fetchone()
 
-    if user and user[7] == 1:
-        # Admin can see all receipts
-        cursor.execute("SELECT * FROM parsed_receipts")
+    if user and user[7] == 1:  # Admin user
+        cursor.execute("""
+            SELECT 
+            r.*, u.name as uploader_name
+            FROM parsed_receipts r
+            LEFT JOIN users u ON r.user_id = u.id
+            ORDER BY r.date_submitted DESC
+        """)
     else:
-        # Non-admin users only see their own receipts
-        cursor.execute("SELECT * FROM parsed_receipts WHERE user_id = ?", (session['user_id'],))
+        cursor.execute("""
+            SELECT 
+            r.*, u.name as uploader_name
+            FROM parsed_receipts r
+            LEFT JOIN users u ON r.user_id = u.id
+            WHERE r.user_id = ?
+        """, (session['user_id'],))
 
     receipts = cursor.fetchall()
-
     return render_template('view_receipts.html', receipts=receipts)
+
+@app.route('/receipt_details/<string:rq_invoice>')
+def receipt_details(rq_invoice):
+    if 'logged_in' not in session:
+        return redirect(url_for('login'))
+
+    db = get_db()
+    cursor = db.cursor()
+
+    # Fetch user details to check if admin
+    cursor.execute("SELECT * FROM users WHERE id = ?", (session['user_id'],))
+    user = cursor.fetchone()
+    is_admin = user and user[7] == 1
+
+    # Fetch receipt details
+    if is_admin:
+        cursor.execute("""
+            SELECT 
+            r.*, u.name as uploader_name
+            FROM parsed_receipts r
+            LEFT JOIN users u ON r.user_id = u.id
+            WHERE r.rq_invoice = ?
+        """, (rq_invoice,))
+    else:
+        cursor.execute("""
+            SELECT 
+            r.*, u.name as uploader_name
+            FROM parsed_receipts r
+            LEFT JOIN users u ON r.user_id = u.id
+            WHERE r.rq_invoice = ? AND r.user_id = ?
+        """, (rq_invoice, session['user_id']))
+
+    receipt = cursor.fetchone()
+    if not receipt:
+        return "Receipt not found", 404
+    
+    imei_iccid_pairs = []
+    if receipt and receipt[-1]:  # Assuming imei_iccid_pairs is the last column
+        try:
+            imei_iccid_pairs = json.loads(receipt[-1])
+        except (json.JSONDecodeError, TypeError):
+            pass
+
+    return render_template('receipt_details.html', receipt=receipt, imei_iccid_pairs=imei_iccid_pairs)
 
 @app.route('/commission')
 def commission():
@@ -743,14 +826,27 @@ def commission():
                 SUM(COALESCE(parsed_receipts.activations_count, 0)) as total_activations,
                 SUM(COALESCE(parsed_receipts.upgrades_count, 0)) as total_upgrades,
                 SUM(COALESCE(parsed_receipts.activations_count, 0) + COALESCE(parsed_receipts.upgrades_count, 0)) as total_devices,
-                COALESCE(SUM(parsed_receipts.total_price), 0) as total_accessories
+                COALESCE(SUM(parsed_receipts.total_price), 0) as total_accessories,
+                CASE 
+                    WHEN COALESCE(SUM(parsed_receipts.total_price), 0) >= 1750 THEN 4
+                    WHEN COALESCE(SUM(parsed_receipts.total_price), 0) >= 1000 THEN 3
+                    WHEN COALESCE(SUM(parsed_receipts.total_price), 0) >= 750 THEN 2
+                    WHEN COALESCE(SUM(parsed_receipts.total_price), 0) >= 500 THEN 1
+                    ELSE 1
+                END as current_tier
             FROM 
                 users
             LEFT JOIN 
                 parsed_receipts ON users.id = parsed_receipts.user_id
+            WHERE
+                users.is_admin = 0
             GROUP BY 
                 users.username, users.name
         ''')
+        commission_data = cursor.fetchall()
+        return render_template('commission.html', 
+                             commission_data=commission_data, 
+                             is_admin=is_admin)
     else:
         cursor.execute('''
             SELECT 
@@ -759,7 +855,14 @@ def commission():
                 SUM(COALESCE(parsed_receipts.activations_count, 0)) as total_activations,
                 SUM(COALESCE(parsed_receipts.upgrades_count, 0)) as total_upgrades,
                 SUM(COALESCE(parsed_receipts.activations_count, 0) + COALESCE(parsed_receipts.upgrades_count, 0)) as total_devices,
-                COALESCE(SUM(parsed_receipts.total_price), 0) as total_accessories
+                COALESCE(SUM(parsed_receipts.total_price), 0) as total_accessories,
+                CASE 
+                    WHEN COALESCE(SUM(parsed_receipts.total_price), 0) >= 1750 THEN 4
+                    WHEN COALESCE(SUM(parsed_receipts.total_price), 0) >= 1000 THEN 3
+                    WHEN COALESCE(SUM(parsed_receipts.total_price), 0) >= 750 THEN 2
+                    WHEN COALESCE(SUM(parsed_receipts.total_price), 0) >= 500 THEN 1
+                    ELSE 1
+                END as current_tier
             FROM 
                 users
             LEFT JOIN 
@@ -770,29 +873,21 @@ def commission():
                 users.username, users.name
         ''', (session['user_id'],))
 
-    commission_data = cursor.fetchall()
-    
-    # Calculate accessories total and progress
-    accessories_total = commission_data[0][5] if commission_data else 0
-    progress = min((float(accessories_total) / 1750 * 100), 100)
-    
-    # Calculate current tier
-    current_tier = 1
-    if accessories_total >= 1750:
-        current_tier = 4
-    elif accessories_total >= 1000:
-        current_tier = 3
-    elif accessories_total >= 750:
-        current_tier = 2
-    elif accessories_total >= 500:
-        current_tier = 1
+        commission_data = cursor.fetchall()
+        
+        # Calculate accessories total and progress
+        accessories_total = commission_data[0][5] if commission_data else 0
+        progress = min((float(accessories_total) / 1750 * 100), 100)
+        
+        # Get tier from the query result
+        current_tier = commission_data[0][6] if commission_data else 1
 
-    return render_template('commission.html', 
-                         commission_data=commission_data, 
-                         is_admin=is_admin,
-                         accessories_total=accessories_total,
-                         current_tier=current_tier,
-                         progress=progress)
+        return render_template('commission.html', 
+                             commission_data=commission_data, 
+                             is_admin=is_admin,
+                             accessories_total=accessories_total,
+                             current_tier=current_tier,
+                             progress=progress)
 
 if __name__ == '__main__':
     with app.app_context():
