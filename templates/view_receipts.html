@@ -75,10 +75,12 @@
         .link-bar {
             text-align: center;
             margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
         }
         .link-bar a {
             text-decoration: none;
-            margin: 0 10px;
             padding: 10px 20px;
             color: #ffffff;
             border-radius: 5px;
@@ -86,7 +88,11 @@
             transition: background-color 0.3s;
         }
         .link-bar a:hover {
-            background-color: #60a82c;
+            background-color: #4e8725;
+        }
+        .money {
+            text-align: right;
+            font-family: 'Courier New', monospace;
         }
     </style>
 </head>
@@ -100,11 +106,11 @@
                 <th>Order Date</th>
                 <th>Sales Person</th>
                 <th>Invoice Number</th>
-                <th>Total Price</th>
+                <th>Accessories Total</th>
                 <th>Upgrades</th>
                 <th>Activations</th>
                 <th>PPP Present</th>
-                <th>Activation Fee Sum</th>
+                <th>Activation Fee</th>
                 <th>Actions</th>
             </tr>
             {% for receipt in receipts %}
@@ -114,11 +120,11 @@
                 <td>{{ receipt[3] }}</td>
                 <td>{{ receipt[4] }}</td>
                 <td>{{ receipt[5] }}</td>
-                <td>{{ receipt[6] }}</td>
+                <td class="money">${{ "%.2f"|format(receipt[6] or 0) }}</td>
                 <td>{{ receipt[8] }}</td>
                 <td>{{ receipt[9] }}</td>
                 <td>{{ 'Yes' if receipt[10] else 'No' }}</td>
-                <td>{{ receipt[11] }}</td>
+                <td class="money">${{ "%.2f"|format(receipt[11] or 0) }}</td>
                 <td class="actions">
                     <a href="{{ url_for('edit_receipt', receipt_id=receipt[0]) }}" class="btn edit-btn">Edit</a>
                     <form action="{{ url_for('delete_receipt', receipt_id=receipt[0]) }}" method="post" style="display:inline;">
@@ -129,12 +135,11 @@
             {% endfor %}
         </table>
 
-        <!-- Link bar for navigation -->
         <div class="link-bar">
-            <a href="{{ url_for('upload_pdf') }}">Upload Another Receipt</a>
+            <a href="{{ url_for('upload_pdf') }}">Upload Receipt</a>
+            <a href="{{ url_for('non_admin_dashboard') }}">Home</a>
             <a href="{{ url_for('logout') }}">Logout</a>
         </div>
     </div>
 </body>
 </html>
-

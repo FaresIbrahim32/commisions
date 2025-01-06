@@ -2,17 +2,16 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Employee Commission</title>
+    <title>My Commission</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
+            margin: 0;
             padding: 20px;
-            display: flex;
-            justify-content: center;
         }
         .container {
-            max-width: 90%;
+            max-width: 800px;
             margin: 0 auto;
             background: #ffffff;
             padding: 20px;
@@ -22,54 +21,129 @@
         h1 {
             text-align: center;
             color: #333;
-            font-size: 26px;
+            font-size: 24px;
             margin-bottom: 20px;
         }
         table {
             width: 100%;
             border-collapse: collapse;
-        }
-        table, th, td {
-            border: 1px solid #ddd;
-            padding: 10px;
-            text-align: center;
+            margin-bottom: 20px;
         }
         th {
             background-color: #60a82c;
-            color: #ffffff;
-            font-weight: bold;
+            color: white;
+            padding: 10px;
+            text-align: center;
         }
-        tr:nth-child(even) {
-            background-color: #f9f9f9;
+        td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #ddd;
         }
-        tr:hover {
-            background-color: #f1f1f1;
+        .tier-container {
+            margin-top: 20px;
+        }
+        .tier-header {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 18px;
+            color: #333;
+        }
+        .progress-container {
+            width: 100%;
+            background-color: #eee;
+            height: 20px;
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+        .progress-bar {
+            height: 100%;
+            background-color: #60a82c;
+            border-radius: 10px;
+        }
+        .tier-markers {
+            display: flex;
+            justify-content: space-between;
+            padding: 0 10px;
+            color: #666;
+            font-size: 14px;
+        }
+        .tier-info {
+            text-align: center;
+            margin-top: 10px;
+            color: #333;
+        }
+        .button-container {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .nav-button {
+            padding: 10px 20px;
+            background-color: #60a82c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            text-align: center;
+        }
+        .nav-button:hover {
+            background-color: #4e8725;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Employee Commission</h1>
+        <h1>My Commission</h1>
+        
         <table>
             <tr>
                 <th>Username</th>
-                <th>Employee Name</th>
+                <th>Name</th>
                 <th>Activations</th>
                 <th>Upgrades</th>
-                <th>Devices</th>
+                <th>Total Devices</th>
                 <th>Accessories</th>
             </tr>
-            {% for entry in commission_data %}
+            {% for row in commission_data %}
             <tr>
-                <td>{{ entry[0] }}</td>
-                <td>{{ entry[1] }}</td>
-                <td>{{ entry[2] }}</td>
-                <td>{{ entry[3] }}</td>
-                <td>{{ entry[4] }}</td>
-                <td>{{ entry[5] }}</td>
+                <td>{{ row[0] }}</td>
+                <td>{{ row[1] }}</td>
+                <td>{{ row[2] }}</td>
+                <td>{{ row[3] }}</td>
+                <td>{{ row[4] }}</td>
+                <td>${{ "%.2f"|format(row[5]) }}</td>
             </tr>
             {% endfor %}
         </table>
+
+        <div class="tier-container">
+            <div class="tier-header">Accessory Sales Tier</div>
+            <div class="progress-container">
+                <div class="progress-bar" style="width: {{ progress }}%"></div>
+            </div>
+            <div class="tier-markers">
+                <span>$0</span>
+                <span>$500</span>
+                <span>$750</span>
+                <span>$1000</span>
+                <span>$1750</span>
+            </div>
+            <div class="tier-info">
+                Current Tier: {{ current_tier }}
+                {% if current_tier == 4 %}
+                <br>Maximum tier achieved! 🎯
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="button-container">
+            <a href="{{ url_for('non_admin_dashboard') }}" class="nav-button">Home</a>
+            <a href="{{ url_for('upload_pdf') }}" class="nav-button">Add Sale</a>
+            <a href="{{ url_for('logout') }}" class="nav-button">Logout</a>
+        </div>
     </div>
 </body>
 </html>
