@@ -1,368 +1,367 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-   <meta charset="UTF-8">
-   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <title>Smart Touch Wireless - Employee Login</title>
-   <style>
-       * {
-           margin: 0;
-           padding: 0;
-           box-sizing: border-box;
-           font-family: Arial, sans-serif;
-       }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Touch Wireless - Employee Login</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
 
-       body {
-           perspective: 1000px;
-           transform-style: preserve-3d;
-           background-color: #ffffff;
-       }
+        body {
+            perspective: 1000px;
+            transform-style: preserve-3d;
+            background-color: #ffffff;
+        }
 
-       .navbar {
-           background-color: #43B02A;
-           padding: 1rem 2rem;
-           display: flex;
-           justify-content: flex-end;
-           align-items: center;
-           position: fixed;
-           width: 100%;
-           top: 0;
-           z-index: 1000;
-           box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-           transform: translateZ(50px);
-           transition: transform 0.3s ease;
-       }
+        .navbar {
+            background-color: #43B02A;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            transform: translateZ(50px);
+            transition: transform 0.3s ease;
+        }
 
-       .navbar:hover {
-           transform: translateZ(60px);
-       }
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transform-style: preserve-3d;
+        }
 
-       .nav-item {
-           position: relative;
-           color: white;
-           padding: 1rem;
-           margin: 0 1rem;
-           cursor: pointer;
-           text-decoration: none;
-           font-weight: bold;
-           transition: transform 0.3s ease;
-       }
+        .logo {
+            height: 80px;
+            width: auto;
+            transition: transform 0.3s ease;
+            padding: 4px;
+            background-color: transparent; /* Removed white background */
+            border-radius: 0; /* Removed rounded corners */
+            filter: invert(1) brightness(1.5);
+        }
 
-       .nav-item:hover {
-           transform: translateZ(20px) scale(1.05);
-       }
+        .logo:hover {
+            transform: translateZ(20px) scale(1.05);
+        }
 
-       .hover-content {
-           display: none;
-           position: absolute;
-           top: 100%;
-           right: 0;
-           background-color: white;
-           padding: 1rem;
-           border-radius: 5px;
-           box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-           width: max-content;
-           max-width: 300px;
-           color: #333;
-           z-index: 1000;
-           transform: translateZ(30px);
-           transition: transform 0.3s ease;
-       }
+        .logo-divider {
+            color: white;
+            font-size: 2rem;
+            font-weight: 300;
+            padding: 0 0.5rem;
+        }
 
-       .nav-item:first-of-type .hover-content {
-           left: 0;
-           right: auto;
-       }
+        .nav-items {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
 
-       .nav-item:hover .hover-content {
-           display: block;
-       }
+        .nav-item {
+            position: relative;
+            color: white;
+            padding: 0.5rem;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: bold;
+            transition: transform 0.3s ease;
+        }
 
-       .navbar-logo-right {
-           margin-left: 1rem;
-           display: flex;
-           align-items: center;
-           transform-style: preserve-3d;
-       }
+        .nav-item:hover {
+            transform: translateZ(20px) scale(1.05);
+        }
 
-       .navbar-logo-right .logo {
-           height: 60px; /* Increased size for right logo */
-           width: auto;
-           transition: transform 0.3s ease;
-           background-color: transparent; /* Override the white background for right logo */
-           padding: 0; /* Remove padding for right logo */
-       }
+        .hover-content {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background-color: white;
+            padding: 1rem;
+            border-radius: 5px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            width: max-content;
+            max-width: 300px;
+            color: #333;
+            z-index: 1000;
+            transform: translateZ(30px);
+        }
 
-       .navbar-logo-right .logo:hover {
-           transform: translateZ(20px) scale(1.05);
-       }
+        .nav-item:hover .hover-content {
+            display: block;
+        }
 
-       .logo-container {
-           margin-right: auto;
-           padding-left: 2rem; /* Increased left padding */
-           display: flex;
-           align-items: center;
-           transform-style: preserve-3d;
-       }
+        .main-content {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 2rem;
+            padding-top: 80px;
+            transform-style: preserve-3d;
+        }
 
-       .logo {
-           height: 60px; /* Adjusted for larger logo size */
-           width: auto;
-           transition: transform 0.3s ease;
-           padding: 6px; /* Additional padding for spacing */
-           background-color: white; /* White background for contrast */
-           border-radius: 4px; /* Rounded corners */
-       }
+        .cricket-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40%;
+            max-width: 400px;
+        }
 
-       .logo:hover {
-           transform: translateZ(20px) scale(1.05);
-       }
+        .cricket-logo img {
+            max-width: 100%;
+            height: auto;
+            background-color: transparent; /* Removed white background */
+            filter: brightness(1.5) ; /* Makes dark logos light to match the theme */
+        }
 
-       /* Rest of the existing styles remain unchanged */
-       .main-content {
-           min-height: 100vh;
-           display: flex;
-           justify-content: center;
-           align-items: center;
-           gap: 2rem;
-           padding-top: 80px;
-           transform-style: preserve-3d;
-       }
+        .login-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            transform: translateZ(30px);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            transform-style: preserve-3d;
+        }
 
-       .cricket-logo {
-           display: flex;
-           align-items: center;
-           justify-content: center;
-           width: 40%;
-           max-width: 400px;
-       }
+        .login-container:hover {
+            transform: translateZ(50px);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.25);
+        }
 
-       .cricket-logo img {
-           max-width: 100%;
-           height: auto;
-       }
+        .login-container h2,
+        .login-container h3 {
+            margin: 0;
+            padding: 0;
+        }
 
-       .login-container {
-           background: white;
-           padding: 2rem;
-           border-radius: 10px;
-           box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-           width: 100%;
-           max-width: 400px;
-           text-align: center;
-           transform: translateZ(30px);
-           transition: transform 0.3s ease, box-shadow 0.3s ease;
-           transform-style: preserve-3d;
-       }
+        .login-container h2 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #43B02A;
+            margin-bottom: 0.5rem;
+        }
 
-       .login-container:hover {
-           transform: translateZ(50px);
-           box-shadow: 0 30px 60px rgba(0,0,0,0.25);
-       }
+        .login-container h3 {
+            font-size: 1rem;
+            color: #333;
+            font-weight: normal;
+            margin-bottom: 1.5rem;
+        }
 
-       .login-container h2 {
-           color: #43B02A;
-           font-size: 1.2rem;
-           font-weight: bold;
-           margin-bottom: 1rem;
-           transform: translateZ(10px);
-       }
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            transform-style: preserve-3d;
+        }
 
-       .login-form {
-           display: flex;
-           flex-direction: column;
-           gap: 1rem;
-           transform-style: preserve-3d;
-       }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            transform: translateZ(20px);
+            transition: transform 0.3s ease;
+            margin-bottom: 1rem;
+        }
 
-       .form-group {
-           display: flex;
-           flex-direction: column;
-           gap: 0.5rem;
-           transform: translateZ(20px);
-           transition: transform 0.3s ease;
-           margin-bottom: 1rem;
-       }
+        .form-group:focus-within {
+            transform: translateZ(30px);
+        }
 
-       .form-group:focus-within {
-           transform: translateZ(30px);
-       }
+        .form-group label {
+            color: #333;
+            font-weight: bold;
+            text-align: left;
+        }
 
-       .form-group label {
-           color: #333;
-           font-weight: bold;
-       }
+        .input-field {
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            width: 100%;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
 
-       .input-field {
-           padding: 0.8rem;
-           border: 1px solid #ddd;
-           border-radius: 5px;
-           font-size: 1rem;
-           width: 100%;
-           transition: all 0.3s ease;
-           box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-       }
+        .input-field:focus {
+            outline: none;
+            border-color: #43B02A;
+            box-shadow: 0 4px 8px rgba(67,176,42,0.2);
+            transform: translateZ(10px);
+        }
 
-       .input-field:focus {
-           outline: none;
-           border-color: #43B02A;
-           box-shadow: 0 4px 8px rgba(67,176,42,0.2);
-           transform: translateZ(10px);
-       }
+        .buttons-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            transform-style: preserve-3d;
+        }
 
-       .buttons-container {
-           display: flex;
-           flex-direction: column;
-           gap: 1.5rem;
-           transform-style: preserve-3d;
-       }
+        .btn {
+            padding: 1rem;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            transform: translateZ(20px);
+        }
 
-       .btn {
-           padding: 1rem;
-           border: none;
-           border-radius: 5px;
-           font-size: 1rem;
-           font-weight: bold;
-           cursor: pointer;
-           transition: all 0.3s ease;
-           width: 100%;
-           transform: translateZ(20px);
-       }
+        .login-btn {
+            background-color: #43B02A;
+            color: white;
+        }
 
-       .login-btn {
-           background-color: #43B02A;
-           color: white;
-       }
+        .login-btn:hover {
+            background-color: #378522;
+            transform: translateZ(30px) scale(1.02);
+            box-shadow: 0 8px 16px rgba(67,176,42,0.3);
+        }
 
-       .login-btn:hover {
-           background-color: #378522;
-           transform: translateZ(30px) scale(1.02);
-           box-shadow: 0 8px 16px rgba(67,176,42,0.3);
-       }
+        .register-btn {
+            background-color: transparent;
+            color: #43B02A;
+            border: 2px solid #43B02A;
+            text-decoration: none;
+            text-align: center;
+        }
 
-       .register-btn {
-           background-color: transparent;
-           color: #43B02A;
-           border: 2px solid #43B02A;
-           text-decoration: none;
-           text-align: center;
-           margin-top: 0;
-       }
+        .register-btn:hover {
+            background-color: #43B02A;
+            color: white;
+            transform: translateZ(30px) scale(1.02);
+            box-shadow: 0 8px 16px rgba(67,176,42,0.3);
+        }
 
-       .register-btn:hover {
-           background-color: #43B02A;
-           color: white;
-           transform: translateZ(30px) scale(1.02);
-           box-shadow: 0 8px 16px rgba(67,176,42,0.3);
-       }
+        .error-message {
+            color: #ff0000;
+            text-align: center;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            transform: translateZ(20px);
+        }
 
-       .error-message {
-           color: #ff0000;
-           text-align: center;
-           margin-bottom: 1rem;
-           font-size: 0.9rem;
-           transform: translateZ(20px);
-       }
+        .register-text {
+            text-align: center;
+            margin-top: 1.5rem;
+            color: #666;
+            transform: translateZ(10px);
+        }
 
-       .register-text {
-           text-align: center;
-           margin-top: 1.5rem;
-           color: #666;
-           transform: translateZ(10px);
-       }
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 0.5rem 1rem;
+            }
 
-       @media (max-width: 768px) {
-           .main-content {
-               flex-direction: column;
-               padding: 1rem;
-           }
+            .logo {
+                height: 30px;
+            }
 
-           .cricket-logo {
-               width: 100%;
-           }
-           
-           .navbar {
-               padding: 0.5rem;
-           }
+            .logo-divider {
+                font-size: 1.5rem;
+            }
 
-           .nav-item {
-               padding: 0.5rem;
-               margin: 0 0.5rem;
-           }
+            .nav-items {
+                gap: 0.5rem;
+            }
 
-           .logo {
-               height: 50px; /* Adjusted for smaller screens */
-           }
+            .main-content {
+                flex-direction: column;
+                padding: 1rem;
+                padding-top: 100px;
+            }
 
-           .logo-container {
-               padding-left: 1rem;
-           }
-       }
-   </style>
+            .cricket-logo {
+                width: 80%;
+            }
+
+            .nav-item {
+                padding: 0.3rem;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
 </head>
 <body>
-   <nav class="navbar">
-       <div class="logo-container">
-           <img src="{{ url_for('static', filename='img/2025-01-08 - fares.png') }}" alt="Smart Touch Wireless" class="logo">
-       </div>
+    <nav class="navbar">
+        <div class="logo-container">
+            <img src="{{ url_for('static', filename='img/2025-01-08 - fares.png') }}" alt="Smart Touch Wireless" class="logo">
+            <span class="logo-divider">|</span>
+            <img src="{{ url_for('static', filename='img/IMG_8831.jpg') }}" alt="Smart Touch Wireless" class="logo">
+        </div>
+        
+        <div class="nav-items">
+            <div class="nav-item">
+                Contact Us
+                <div class="hover-content">
+                    <p>Hello@smarttouchwireless.com</p>
+                    <p>Phone: 123-456-789</p>
+                    <p>Address: 5530 Gall Blvd</p>
+                </div>
+            </div>
+
+            <div class="nav-item">
+                Mission
+                <div class="hover-content">
+                    <p>To provide exceptional wireless services and solutions while maintaining the highest standards of customer satisfaction and professional integrity.</p>
+                </div>
+            </div>
+
+            <div class="nav-item">
+                Vision
+                <div class="hover-content">
+                    <p>To be the leading Cricket Wireless retailer, known for outstanding customer service and innovative solutions in the wireless communication industry.</p>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content">
        
-       <div class="nav-item">
-           Contact Us
-           <div class="hover-content">
-               <p>Email: Hr@smarttouchwireless.com</p>
-               <p>Phone: 813-435-8771</p>
-               <p>Address: 5530 Gall Blvd</p>
-               <p>Zephyrhills, FL 33542</p>
-           </div>
-       </div>
 
-       <div class="nav-item">
-           Mission
-           <div class="hover-content">
-               <p>To provide exceptional wireless services and solutions while maintaining the highest standards of customer satisfaction and professional integrity.</p>
-           </div>
-       </div>
+        <div class="login-container">
+            <h2>Welcome to Smart Touch Wireless</h2>
+            <h3>Your Authorized Cricket Retailer</h3>
+            
+            {% if request.args.get('session_expired') %}
+                <p class="error-message">Your session has expired. Please log in again.</p>
+            {% endif %}
 
-       <div class="nav-item">
-           Vision
-           <div class="hover-content">
-               <p>To be the leading Cricket Wireless retailer, known for outstanding customer service and innovative solutions in the wireless communication industry.</p>
-           </div>
-       </div>
-       
-       <div class="navbar-logo-right">
-           <img src="{{ url_for('static', filename='img/IMG_8831.jpg') }}" alt="Smart Touch Wireless" class="logo">
-       </div>
-   </nav>
-
-   <main class="main-content">
-       <div class="cricket-logo">
-           <img src="{{ url_for('static', filename='img/STW_Logo resized.png') }}" alt="Cricket Logo">
-       </div>
-
-       <div class="login-container">
-           <h2>Employee Portal</h2>
-           
-           {% if request.args.get('session_expired') %}
-               <p class="error-message">Your session has expired. Please log in again.</p>
-           {% endif %}
-
-           <form class="login-form" action="{{ url_for('login') }}" method="POST">
-               <div class="form-group">
-                   <label for="username">Username</label>
-                   <input type="text" id="username" name="username" class="input-field" required>
-               </div>
-               <div class="form-group">
-                   <label for="password">Password</label>
-                   <input type="password" id="password" name="password" class="input-field" required>
-               </div>
-               <div class="buttons-container">
-                   <button type="submit" class="btn login-btn">Login</button>
-                   <a href="{{ url_for('register') }}" class="btn register-btn">Register New Account</a>
-               </div>
-           </form>
-           <p class="register-text">New employee? Click register to create your account</p>
-       </div>
-   </main>
+            <form class="login-form" action="{{ url_for('login') }}" method="POST">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" class="input-field" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" class="input-field" required>
+                </div>
+                <div class="buttons-container">
+                    <button type="submit" class="btn login-btn">Login</button>
+                    <a href="{{ url_for('register') }}" class="btn register-btn">Register New Account</a>
+                </div>
+            </form>
+            <p class="register-text">New employee? Click register to create your account</p>
+        </div>
+    </main>
 </body>
 </html>
