@@ -4,77 +4,156 @@
     <meta charset="UTF-8">
     <title>Employee Home - Upload PDF</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 2rem;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            perspective: 1000px;
         }
+
         .container {
             background-color: #ffffff;
-            padding: 30px;
+            padding: 2rem;
             border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             text-align: center;
             width: 300px;
+            transform-style: preserve-3d;
+            transform: translateZ(0);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
+
+        .container:hover {
+            transform: translateZ(10px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+
         h1 {
-            color: #333;
-            font-size: 24px;
-            margin-bottom: 20px;
+            color: #43B02A;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            transform: translateZ(20px);
         }
+
         .btn-container {
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 1rem;
+            transform-style: preserve-3d;
+            transform: translateZ(15px);
         }
+
         .btn {
-            padding: 12px 20px;
+            padding: 0.75rem 1.5rem;
             border: none;
             border-radius: 5px;
-            font-size: 16px;
+            font-size: 1rem;
             color: #ffffff;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: all 0.3s ease;
             text-decoration: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transform: translateZ(0);
         }
+
+        .btn:hover {
+            transform: translateZ(10px) translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            opacity: 1;
+        }
+
         .btn-upload {
-            background-color: #60a82c;
+            background-color: #43B02A;
         }
+
+        .btn-upload:hover {
+            background-color: #378522;
+        }
+
         .btn-view {
-            background-color: #007bff;
+            background-color: #43B02A;
         }
+
+        .btn-view:hover {
+            background-color: #378522;
+        }
+
         .btn-logout {
             background-color: #dc3545;
         }
-        .btn:hover {
-            opacity: 0.85;
+
+        .btn-logout:hover {
+            background-color: #c82333;
         }
+
         .upload-form {
-            margin-top: 20px;
+            margin-top: 1.5rem;
+            transform-style: preserve-3d;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
         }
+
         input[type="file"] {
             display: none;
         }
+
         label {
             cursor: pointer;
             color: #ffffff;
-            background-color: #60a82c;
-            padding: 10px 20px;
+            background-color: #43B02A;
+            padding: 0.75rem 1.5rem;
             border-radius: 5px;
-            transition: background-color 0.3s;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transform: translateZ(0);
+            font-weight: bold;
         }
+
         label:hover {
-            background-color: #4e8725;
+            background-color: #378522;
+            transform: translateZ(10px) translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
         }
+
         .filename {
-            margin-top: 10px;
-            font-size: 14px;
-            color: #333;
+            margin-top: 0.75rem;
+            font-size: 0.875rem;
+            color: #666;
+            transform: translateZ(5px);
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+
+            .container {
+                width: 90%;
+                padding: 1.5rem;
+            }
+
+            .btn {
+                padding: 0.7rem 1.2rem;
+                font-size: 0.95rem;
+            }
+
+            label {
+                padding: 0.7rem 1.2rem;
+                font-size: 0.95rem;
+            }
         }
     </style>
     <script>
@@ -83,10 +162,8 @@
             const fileLabel = document.getElementById('fileLabel');
             const filenameDisplay = document.getElementById('filenameDisplay');
             
-            // Display the file name in the label or below the label
             if (fileInput.files.length > 0) {
-                fileLabel.textContent = fileInput.files[0].name;  // Option 1: replace the label text
-                // filenameDisplay.textContent = fileInput.files[0].name;  // Option 2: show it below the label
+                fileLabel.textContent = fileInput.files[0].name;
             }
         }
     </script>
@@ -94,22 +171,16 @@
 <body>
     <div class="container">
         <div class="btn-container">
-            <!-- View Stored Receipts Button -->
             <a href="{{ url_for('view_receipts') }}" class="btn btn-view">View Stored Receipts</a>
             
-            <!-- Upload PDF Form -->
             <form action="{{ url_for('upload_pdf') }}" method="POST" enctype="multipart/form-data" class="upload-form">
                 <input type="file" name="pdf" id="pdf" accept=".pdf" required onchange="showFilename()">
                 <label for="pdf" id="fileLabel">Upload PDF</label>
-                <!-- Uncomment the next line if you prefer the filename to be shown below the button instead -->
-                <!-- <div id="filenameDisplay" class="filename"></div> -->
                 <button type="submit" class="btn btn-upload">Submit</button>
             </form>
             
-            <!-- Logout Button -->
             <a href="{{ url_for('logout') }}" class="btn btn-logout">Logout</a>
         </div>
     </div>
 </body>
 </html>
- 

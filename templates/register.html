@@ -1,24 +1,165 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Register</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Smart Touch Wireless - Register</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            perspective: 1000px;
+            transform-style: preserve-3d;
+            background-color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .main-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .cricket-logo {
+            width: 40%;
+            max-width: 400px;
+        }
+
+        .cricket-logo img {
+            width: 100%;
+            height: auto;
+            object-fit: contain;
+        }
+
+        .register-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        h1 {
+            color: #43B02A;
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #43B02A;
+            box-shadow: 0 4px 8px rgba(67,176,42,0.2);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 1rem;
+            background-color: #43B02A;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #378522;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+                padding: 1rem;
+            }
+
+            .cricket-logo {
+                width: 80%;
+                margin-bottom: 2rem;
+            }
+
+            .register-container {
+                width: 90%;
+            }
+        }
+    </style>
 </head>
 <body>
-    <h1>Register</h1>
-    <form method="POST">
-        <label for="name">Name:</label>
-        <input type="text" id="name" name="name"   
- required><br><br>
+    <div class="main-content">
+        <div class="cricket-logo">
+            <img src="{{ url_for('static', filename='img/IMG_8831.jpg') }}" alt="Cricket Logo">
+        </div>
+        <div class="register-container">
+            <h1>Register</h1>
+            <form method="POST">
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text"
+                           id="name"
+                           name="name"
+                           class="form-control"
+                           placeholder="Enter your full name"
+                           required>
+                </div>
 
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" required><br><br>
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email"
+                           id="email"
+                           name="email"
+                           class="form-control"
+                           placeholder="Enter your email"
+                           required>
+                </div>
 
-        <label for="phone">Phone   
- Number:</label>
-        <input type="tel" id="phone" name="phone" required><br><br>
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <input type="tel"
+                           id="phone"
+                           name="phone"
+                           class="form-control"
+                           placeholder="Enter your phone number"
+                           required>
+                </div>
 
-        <button type="submit">Register</button>
-    </form>
-</body>   
-
+                <button type="submit" class="btn">Register</button>
+            </form>
+        </div>
+    </div>
+</body>
 </html>

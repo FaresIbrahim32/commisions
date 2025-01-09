@@ -3,6 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <title>Admin User Management</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f4f4f4;
+        }
+
+        .main-content {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .dashboard-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+        }
+
+        h1 {
+            color: #43B02A;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            font-size: 2rem;
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            text-align: center;
+            transition: background-color 0.3s;
+        }
+
+        .btn-primary {
+            background-color: #43B02A;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #378522;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            color: #43B02A;
+            border: 2px solid #43B02A;
+        }
+
+        .btn-outline:hover {
+            background-color: #43B02A;
+            color: white;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+        }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+    </style>
 </head>
 <body>
     <h1>Manage Users</h1>

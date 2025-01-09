@@ -15,76 +15,181 @@
             background-color: #f4f4f4;
             min-height: 100vh;
             padding: 2rem;
+            perspective: 1000px;
         }
     
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            transform-style: preserve-3d;
+        }
+
         h1 {
             color: #43B02A;
             text-align: center;
             margin-bottom: 2rem;
             font-size: 2rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            transform: translateZ(20px);
         }
-    
-        /* Styling for the user container */
-        div:not(:first-child) {
-            max-width: 800px;
-            margin: 0 auto 1.5rem auto;
-            background: white;
-            padding: 1.5rem;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-    
-        /* Basic paragraph styling */
-        p {
-            margin: 0.5rem 0;
-            color: #333;
-            font-size: 1rem;
-        }
-    
-        /* Form styling */
-        form {
-            margin-top: 1rem;
-            padding-top: 1rem;
-            border-top: 1px solid #eee;
-        }
-    
-        label {
-            font-weight: bold;
-            color: #333;
-            display: inline-block;
-            min-width: 140px;
-        }
-    
-        input {
-            padding: 0.8rem;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 1rem;
+
+        /* Table styling */
+        table {
             width: 100%;
-            max-width: 300px;
-            margin: 0.5rem 0;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            transform-style: preserve-3d;
+            transform: translateZ(0);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
-    
-        button {
-            padding: 0.8rem 1.5rem;
-            border: none;
-            border-radius: 5px;
-            font-size: 1rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background-color 0.3s;
+
+        table:hover {
+            transform: translateZ(10px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
             background-color: #43B02A;
             color: white;
-            margin-top: 1rem;
+            font-weight: bold;
+            text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.2);
         }
-    
-        button:hover {
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        tr:hover {
+            background-color: #f2f7f2;
+            transform: translateZ(5px);
+            transition: all 0.3s ease;
+        }
+
+        /* Money class styling */
+        .money {
+            font-family: monospace;
+            text-align: right;
+        }
+
+        /* Button and link styling */
+        .btn, .link-bar a {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-block;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transform: translateZ(0);
+        }
+
+        .btn:hover, .link-bar a:hover {
+            transform: translateZ(10px) translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .edit-btn {
+            background-color: #43B02A;
+            color: white;
+            margin-right: 0.5rem;
+        }
+
+        .edit-btn:hover {
             background-color: #378522;
         }
-    
-        /* Approval status styling */
-        p:nth-child(4) {
-            margin-top: 1rem;
+
+        .delete-btn {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .delete-btn:hover {
+            background-color: #c82333;
+        }
+
+        .actions {
+            white-space: nowrap;
+            text-align: right;
+        }
+
+        /* Link bar styling */
+        .link-bar {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 2rem;
+            transform-style: preserve-3d;
+            transform: translateZ(30px);
+        }
+
+        .link-bar a {
+            background-color: #43B02A;
+            color: white;
+        }
+
+        .link-bar a:hover {
+            background-color: #378522;
+        }
+
+        /* Responsive design */
+        @media (max-width: 1200px) {
+            .container {
+                width: 95%;
+            }
+
+            table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+                margin-bottom: 1.5rem;
+            }
+
+            th, td {
+                padding: 0.75rem;
+                font-size: 0.9rem;
+            }
+
+            .btn, .link-bar a {
+                padding: 0.6rem 1.2rem;
+                font-size: 0.85rem;
+            }
+
+            .link-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .link-bar a {
+                text-align: center;
+            }
         }
     </style>
 </head>
@@ -107,7 +212,7 @@
             </tr>
             {% for receipt in receipts %}
             <tr>
-                <td><a href="{{ url_for('receipt_details', rq_invoice=receipt[5]) }}" style="color: #60a82c; text-decoration: none; font-weight: bold;">{{ receipt[5] }}</a></td>
+                <td><a href="{{ url_for('receipt_details', rq_invoice=receipt[5]) }}" style="color: #43B02A; text-decoration: none; font-weight: bold;">{{ receipt[5] }}</a></td>
                 <td>{{ receipt[1] }}</td>
                 <td>{{ receipt[2] }}</td>
                 <td>{{ receipt[3] }}</td>
