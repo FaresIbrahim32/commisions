@@ -4,95 +4,87 @@
     <meta charset="UTF-8">
     <title>View Stored Receipts</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+        * {
             margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
         }
-        .container {
-            max-width: 90%;
-            margin: 0 auto;
-            background: #ffffff;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    
+        body {
+            background-color: #f4f4f4;
+            min-height: 100vh;
+            padding: 2rem;
         }
+    
         h1 {
+            color: #43B02A;
             text-align: center;
+            margin-bottom: 2rem;
+            font-size: 2rem;
+        }
+    
+        /* Styling for the user container */
+        div:not(:first-child) {
+            max-width: 800px;
+            margin: 0 auto 1.5rem auto;
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+    
+        /* Basic paragraph styling */
+        p {
+            margin: 0.5rem 0;
             color: #333;
-            font-size: 26px;
-            margin-bottom: 20px;
+            font-size: 1rem;
         }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
+    
+        /* Form styling */
+        form {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #eee;
         }
-        table, th, td {
-            border: 1px solid #ddd;
-            padding: 12px;
-            text-align: center;
-        }
-        th {
-            background-color: #60a82c;
-            color: #ffffff;
+    
+        label {
             font-weight: bold;
+            color: #333;
+            display: inline-block;
+            min-width: 140px;
         }
-        tr:nth-child(even) {
-            background-color: #f9f9f9;
+    
+        input {
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            width: 100%;
+            max-width: 300px;
+            margin: 0.5rem 0;
         }
-        tr:hover {
-            background-color: #f1f1f1;
-        }
-        .actions {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-        }
-        .btn {
-            padding: 8px 14px;
+    
+        button {
+            padding: 0.8rem 1.5rem;
             border: none;
             border-radius: 5px;
-            color: #ffffff;
-            font-size: 14px;
+            font-size: 1rem;
+            font-weight: bold;
             cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
-        }
-        .edit-btn {
-            background-color: #60a82c;
-        }
-        .delete-btn {
-            background-color: #dc3545;
-        }
-        .btn:hover {
-            opacity: 0.85;
-        }
-        .link-bar {
-            text-align: center;
-            margin-top: 20px;
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-        }
-        .link-bar a {
-            text-decoration: none;
-            padding: 10px 20px;
-            color: #ffffff;
-            border-radius: 5px;
-            background-color: #60a82c;
             transition: background-color 0.3s;
+            background-color: #43B02A;
+            color: white;
+            margin-top: 1rem;
         }
-        .link-bar a:hover {
-            background-color: #4e8725;
+    
+        button:hover {
+            background-color: #378522;
         }
-        .money {
-            text-align: right;
-            font-family: 'Courier New', monospace;
+    
+        /* Approval status styling */
+        p:nth-child(4) {
+            margin-top: 1rem;
         }
     </style>
 </head>

@@ -311,37 +311,3 @@
            </div>
        </div>
    </nav>
-
-   <main class="main-content">
-       <!-- Cricket logo section -->
-       <div class="cricket-logo">
-           <img src="{{ url_for('static', filename='img/IMG_8832.jpg') }}" alt="Cricket Logo">
-       </div>
-
-       <!-- Login container section -->
-       <div class="login-container">
-           <h2>Employee Portal</h2>
-           
-           {% if request.args.get('session_expired') %}
-               <p class="error-message">Your session has expired. Please log in again.</p>
-           {% endif %}
-
-           <form class="login-form" action="{{ url_for('login') }}" method="POST">
-               <div class="form-group">
-                   <label for="username">Username</label>
-                   <input type="text" id="username" name="username" class="input-field" required>
-               </div>
-               <div class="form-group">
-                   <label for="password">Password</label>
-                   <input type="password" id="password" name="password" class="input-field" required>
-               </div>
-               <div class="buttons-container">
-                   <button type="submit" class="btn login-btn">Login</button>
-                   <a href="{{ url_for('register') }}" class="btn register-btn">Register New Account</a>
-               </div>
-           </form>
-           <p class="register-text">New employee? Click register to create your account</p>
-       </div>
-   </main>
-</body>
-</html>

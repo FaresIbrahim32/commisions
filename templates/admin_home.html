@@ -2,130 +2,136 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Smart Touch Wireless - Admin Dashboard</title>
     <style>
-        *, *:before, *:after {
-            box-sizing: inherit;
-        }
-
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+        * {
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+    
+        body {
+            perspective: 1000px;
+            transform-style: preserve-3d;
+            background-color: #ffffff;
             min-height: 100vh;
             display: flex;
-            justify-content: center;
             align-items: center;
-            box-sizing: border-box;
+            justify-content: center;
+            padding: 2rem;
         }
-
-        .container {
-            width: 95%;
-            max-width: 400px;
-            text-align: center;
-            background: #fff;
-            padding: 40px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-
-        h1 {
-            font-size: 24px;
-            color: #333;
-            margin-bottom: 30px;
-            margin-top: 0;
-        }
-
-        .button-container {
+    
+        .main-content {
             display: flex;
-            flex-direction: column;
-            gap: 15px;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
             width: 100%;
-            max-width: 300px;
-            margin: 0 auto;
+            max-width: 1200px;
         }
-
-        a, .button {
-            display: block;
-            font-size: 16px;
-            text-decoration: none;
-            color: #333;
-            padding: 12px 20px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            background-color: #f8f8f8;
-            transition: background-color 0.3s, transform 0.2s;
+    
+        .cricket-logo {
+            width: 40%;
+            max-width: 400px;
+        }
+    
+        .cricket-logo img {
             width: 100%;
-            margin: 0 auto;
+            height: auto;
+            object-fit: contain;
+        }
+    
+        .dashboard-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 500px;
+            transform: translateZ(30px);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            transform-style: preserve-3d;
+        }
+    
+        .dashboard-container:hover {
+            transform: translateZ(50px);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.25);
+        }
+    
+        h1 {
+            color: #43B02A;
+            margin-bottom: 2rem;
             text-align: center;
+            font-size: 2rem;
+            transform: translateZ(10px);
         }
-
-        a:hover, .button:hover {
-            background-color: #ddd;
-            transform: translateY(-2px);
+    
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 2px solid #43B02A;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            text-align: center;
+            transition: all 0.3s ease;
+            background-color: transparent;
+            color: #43B02A;
+            transform: translateZ(20px);
         }
-
-        .logout {
+    
+        .btn:hover {
+            background-color: #43B02A;
+            color: white;
+            transform: translateZ(30px) scale(1.02);
+            box-shadow: 0 8px 16px rgba(67,176,42,0.3);
+        }
+    
+        .btn-danger {
             background-color: #dc3545;
             color: white;
             border: none;
-            margin-top: 10px;
         }
-
-        .logout:hover {
+    
+        .btn-danger:hover {
             background-color: #c82333;
+            transform: translateZ(30px) scale(1.02);
+            box-shadow: 0 8px 16px rgba(220,53,69,0.3);
         }
-
-        /* Mobile adjustments */
+    
         @media (max-width: 768px) {
-            body {
-                padding: 15px;
-                align-items: flex-start;
+            .main-content {
+                flex-direction: column;
+                padding: 1rem;
             }
-
-            .container {
-                padding: 25px 20px;
-                margin-top: 20px;
+    
+            .cricket-logo {
+                width: 80%;
+                margin-bottom: 2rem;
             }
-
-            h1 {
-                font-size: 22px;
-                margin-bottom: 25px;
-            }
-
-            a, .button {
-                font-size: 15px;
-                padding: 10px 15px;
-            }
-        }
-
-        /* Very small screens */
-        @media (max-width: 320px) {
-            .container {
-                padding: 20px 15px;
-            }
-
-            h1 {
-                font-size: 20px;
-            }
-
-            a, .button {
-                font-size: 14px;
-                padding: 10px;
+    
+            .dashboard-container {
+                width: 90%;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Admin Dashboard</h1>
-        <div class="button-container">
-            <a href="{{ url_for('employee_list') }}">Employee Management</a>
-            <a href="{{ url_for('commission') }}">Commission of All Employees</a>
-            <a href="#">Placeholder Link</a>
-            <a href="{{ url_for('logout') }}" class="button logout">Logout</a>
+    <div class="main-content">
+        <div class="cricket-logo">
+            <img src="{{ url_for('static', filename='img/IMG_8831.jpg') }}" alt="Cricket Logo">
+        </div>
+        <div class="dashboard-container">
+            <h1>Admin Dashboard</h1>
+            <a href="{{ url_for('employee_list') }}" class="btn">Employee Management</a>
+            <a href="{{ url_for('commission') }}" class="btn">Commission of All Employees</a>
+            <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
         </div>
     </div>
 </body>
