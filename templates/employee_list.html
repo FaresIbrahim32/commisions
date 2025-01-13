@@ -2,174 +2,302 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Employee Management</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+        * {
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
         }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: #fff;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+
+        body {
+            background-color: #f5f5f5;
+            min-height: 100vh;
+            overflow-x: hidden;
         }
-        h1 {
-            font-size: 24px;
-            color: #333;
-            text-align: center;
-            margin-bottom: 20px;
+
+        .navbar {
+            background: linear-gradient(90deg, transparent 0%, #43B02A 90%, #43B02A 100%);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
-        .actions {
-            text-align: right;
-            margin-bottom: 20px;
+
+        .logo-container {
+            display: flex;
+            align-items: center;
         }
-        .actions a {
+
+        .logo {
+            height: 70px;
+            width: auto;
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .nav-items {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-item {
+            position: relative;
+            color: white;
+            padding: 0.5rem;
+            cursor: pointer;
             text-decoration: none;
-            color: #333;
-            padding: 10px 20px;
-            border-radius: 5px;
-            background-color: #f8f8f8;
-            border: 1px solid #ddd;
-            margin-left: 10px;
+            font-weight: 500;
+            transition: transform 0.3s ease;
         }
-        .actions .logout {
-            background-color: #dc3545;
-            color: #fff;
+
+        .main-content {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            padding-top: 100px;
         }
-        .actions .logout:hover {
-            background-color: #c82333;
-        }
-        .actions a:hover {
-            background-color: #ddd;
-        }
-        .search-container {
+
+        .container {
+            background: white;
+            padding: 3.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            width: 100%;
+            max-width: 1200px;
             text-align: center;
-            margin-bottom: 20px;
+            transition: box-shadow 0.3s ease;
         }
+
+        .container:hover {
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        }
+
+        h1 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: rgb(67, 177, 43);
+            margin-bottom: 2rem;
+        }
+
+        .actions a {
+            padding: 0.875rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            background-color: rgb(38, 156, 224);
+            color: white;
+        }
+
+        .actions .logout {
+            background-color: transparent;
+            color: #dc3545;
+            border: 2px solid #dc3545;
+        }
+
+        .actions a:hover {
+            background-color: rgb(0, 62, 127);
+            transform: scale(1.02);
+            box-shadow: 0 4px 8px rgba(0, 62, 127, 0.2);
+        }
+
+        .actions .logout:hover {
+            background-color: #dc3545;
+            color: white;
+            box-shadow: 0 4px 8px rgba(220, 53, 69, 0.2);
+        }
+
+        .search-container {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            width: 100%;
+            max-width: 1200px;
+            text-align: center;
+            transition: box-shadow 0.3s ease;
+        }
+
         .search-box {
-            width: 80%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
+            padding: 0.875rem;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            width: 100%;
+            max-width: 400px;
+            font-size: 1rem;
         }
+
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
         }
-        table, th, td {
+
+        th, td {
+            padding: 1rem;
+            text-align: center;
             border: 1px solid #ddd;
         }
-        th, td {
-            padding: 12px;
-            text-align: center;
-        }
+
         th {
             background-color: #f2f2f2;
+            font-weight: bold;
         }
+
         tr:nth-child(even) {
             background-color: #f9f9f9;
         }
+
         .btn {
-            padding: 8px 12px;
+            padding: 0.875rem;
             border: none;
-            border-radius: 5px;
-            color: #fff;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
             cursor: pointer;
-            margin: 2px;
+            color: white;
+            transition: all 0.3s ease;
+            margin: 0.25rem;
         }
-        .assign {
-            background-color: #007bff;
+
+        .btn.assign {
+            background-color: rgb(38, 156, 224);
         }
-        .approve {
+
+        .btn.approve {
             background-color: #28a745;
         }
-        .reject {
+
+        .btn.reject {
             background-color: #dc3545;
         }
-        .delete {
+
+        .btn.delete {
             background-color: #6c757d;
         }
+
         .btn:hover {
-            opacity: 0.8;
+            transform: scale(1.02);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 0.75rem 1rem;
+            }
+
+            .logo {
+                height: 40px;
+            }
+
+            .main-content {
+                padding: 1rem;
+                padding-top: 80px;
+            }
+
+            .container {
+                padding: 2rem;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Employee Management</h1>
-        <div class="actions">
-            <a href="{{ url_for('admin_home') }}">Return to Admin Dashboard</a>
-            <a href="{{ url_for('logout') }}" class="logout">Logout</a>
+    <nav class="navbar">
+        <div class="logo-container">
+            <img src="/static/logo.png" alt="Smart Touch Wireless" class="logo">
         </div>
-
-        <!-- Search Bar -->
-        <div class="search-container">
-            <input type="text" id="searchInput" class="search-box" placeholder="Search by username..." onkeyup="filterEmployees()">
+        <div class="nav-items">
+            <a href="{{ url_for('admin_home') }}" class="nav-item">Admin Dashboard</a>
+            <a href="{{ url_for('logout') }}" class="nav-item">Logout</a>
         </div>
+    </nav>
 
-        <table id="employeeTable">
-            <thead>
-                <tr>
-                    <th>Username</th>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Phone</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for employee in employees %}
-                <tr>
-                    <td>{{ employee[4] }}</td>
-                    <td>{{ employee[1] }}</td>
-                    <td>{{ employee[2] }}</td>
-                    <td>{{ employee[3] }}</td> 
-                    <td>
-                        {% if employee[5] == 1 %}
-                            Approved
-                        {% elif employee[7] == 1 %}
-                            Rejected
-                        {% else %}
-                            Pending
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if employee[4] is none %}
-                            <form method="POST" action="{{ url_for('assign_username', user_id=employee[0]) }}">
-                                <input type="text" name="username" placeholder="Assign Username">
-                                <button type="submit" class="btn assign">Assign</button>
+    <main class="main-content">
+        <div class="container">
+            <h1>Employee Management</h1>
+            <div class="actions">
+                <a href="{{ url_for('admin_home') }}">Return to Admin Dashboard</a>
+                <a href="{{ url_for('logout') }}" class="logout">Logout</a>
+            </div>
+            <div class="search-container">
+                <input type="text" id="searchInput" class="search-box" placeholder="Search by username..." onkeyup="filterEmployees()">
+            </div>
+            <table id="employeeTable">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for employee in employees %}
+                    <tr>
+                        <td>{{ employee[4] }}</td>
+                        <td>{{ employee[1] }}</td>
+                        <td>{{ employee[2] }}</td>
+                        <td>{{ employee[3] }}</td> 
+                        <td>
+                            {% if employee[5] == 1 %}
+                                Approved
+                            {% elif employee[7] == 1 %}
+                                Rejected
+                            {% else %}
+                                Pending
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if employee[4] is none %}
+                                <form method="POST" action="{{ url_for('assign_username', user_id=employee[0]) }}">
+                                    <input type="text" name="username" placeholder="Assign Username">
+                                    <button type="submit" class="btn assign">Assign</button>
+                                </form>
+                            {% endif %}
+                            <form method="POST" action="{{ url_for('approve_account', user_id=employee[0]) }}">
+                                <button type="submit" class="btn approve">Approve</button>
                             </form>
-                        {% endif %}
-                        <form method="POST" action="{{ url_for('approve_account', user_id=employee[0]) }}">
-                            <button type="submit" class="btn approve">Approve</button>
-                        </form>
-                        <form method="POST" action="{{ url_for('reject_account', user_id=employee[0]) }}">
-                            <button type="submit" class="btn reject">Reject</button>
-                        </form>
-                        <form method="POST" action="{{ url_for('delete_account', user_id=employee[0]) }}" onsubmit="return confirm('Are you sure you want to delete the account for {{ employee[2] }}?');">
-                            <button type="submit" class="btn delete">Delete</button>
-                        </form>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        <br><br>
-        <div class="actions">
-            <a href="{{ url_for('admin_home') }}">Return to Admin Dashboard</a>
-            <a href="{{ url_for('logout') }}" class="logout">Logout</a>
+                            <form method="POST" action="{{ url_for('reject_account', user_id=employee[0]) }}">
+                                <button type="submit" class="btn reject">Reject</button>
+                            </form>
+                            <form method="POST" action="{{ url_for('delete_account', user_id=employee[0]) }}" onsubmit="return confirm('Are you sure you want to delete the account for {{ employee[2] }}?');">
+                                <button type="submit" class="btn delete">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
-    </div>
+    </main>
 
     <script>
-        // JavaScript to filter employee table based on search input
         function filterEmployees() {
             const input = document.getElementById('searchInput');
             const filter = input.value.toLowerCase();
@@ -180,17 +308,10 @@
                 const td = tr[i].getElementsByTagName('td')[0];
                 if (td) {
                     const txtValue = td.textContent || td.innerText;
-                    if (txtValue.toLowerCase().indexOf(filter) > -1) {
-                        tr[i].style.display = '';
-                    } else {
-                        tr[i].style.display = 'none';
-                    }
+                    tr[i].style.display = txtValue.toLowerCase().indexOf(filter) > -1 ? '' : 'none';
                 }       
             }
         }
     </script>
-    
-    
-
 </body>
 </html>

@@ -120,9 +120,24 @@ def non_admin_dashboard():
     
     # If the user is not an admin, show them the dashboard with the three boxes
     if 'admin' not in session:
-        return render_template('non_admin_dashboard.html')
+        # Get the username from session
+        username = session.get('username')
+        
+        # Create database cursor
+        db = get_db()
+        
+        # Query to get the user's name using the username
+        cursor = db.execute("SELECT name FROM users WHERE username = ?", (username,))
+        user = cursor.fetchone()
+        
+        if user:
+            # Pass the name to the template
+            return render_template('non_admin_dashboard.html', current_user=user[0])
+        else:
+            # Fallback to username if name not found
+            return render_template('non_admin_dashboard.html', current_user=username)
     
-    return redirect(url_for('admin_home'))  # Redirect admins to their home page
+    return redirect(url_for('admin_home'))# Redirect admins to their home page
 
 @app.route('/edit_receipt/<int:receipt_id>', methods=['GET', 'POST'])
 def edit_receipt(receipt_id):
@@ -159,12 +174,16 @@ def edit_receipt(receipt_id):
         
         db.commit()
         return redirect(url_for('view_receipts'))
+    
+    cursor.execute("SELECT name FROM users WHERE id = ?", (session['user_id'],))
+    user = cursor.fetchone()
+    current_user = user[0] if user else 'User'
 
     # Fetch the receipt data for editing
     cursor.execute("SELECT * FROM parsed_receipts WHERE id = ?", (receipt_id,))
     receipt = cursor.fetchone()
     
-    return render_template('edit_receipt.html', receipt=receipt)
+    return render_template('edit_receipt.html', receipt=receipt, current_user=current_user)
 
 @app.route('/delete_receipt/<int:receipt_id>', methods=['POST'])
 def delete_receipt(receipt_id):
@@ -296,10 +315,15 @@ def home():
 
 @app.route('/admin/home')
 def admin_home():
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute("SELECT name FROM users WHERE id = ?", (session['user_id'],))
+    user = cursor.fetchone()
     if 'admin' not in session:
         return redirect(url_for('login'))
+    current_user = user[0] if user else 'User'
     
-    return render_template('admin_home.html')
+    return render_template('admin_home.html', current_user=current_user)
 
 # Admin page to list employees and approve/reject accounts
 @app.route('/admin/employees')
@@ -312,7 +336,10 @@ def employee_list():
 
     cursor.execute("SELECT id, name, email, phone, username, approved, is_admin, rejected FROM users")
     employees = cursor.fetchall()
-    return render_template('employee_list.html', employees=employees)
+    cursor.execute("SELECT name FROM users WHERE id = ?", (session['user_id'],))
+    user = cursor.fetchone()
+    current_user = user[0] if user else 'User'
+    return render_template('employee_list.html', employees=employees, current_user=current_user)
 
 @app.route('/admin/commission')
 def view_commission():
@@ -349,20 +376,6 @@ def approve_user_account(user_id):
     db.commit()
     
     return redirect(url_for('employee_list'))
-
-@app.route('/admin/view_all_users')
-def view_all_users():
-    if 'admin' not in session:
-        return redirect(url_for('login'))
-
-    db = get_db()
-    cursor = db.cursor()
-    
-    # Query to get all user details
-    cursor.execute("SELECT id, name, email, phone, username, approved, is_admin FROM users")
-    users = cursor.fetchall()
-    
-    return render_template('admin_users.html', users=users)
 
 @app.route('/admin/approve/<int:user_id>', methods=['POST'])
 def approve_account(user_id):
@@ -638,6 +651,7 @@ def confirm_receipt():
     cursor.execute("SELECT name FROM users WHERE id = ?", (session['user_id'],))
     user = cursor.fetchone()
     logged_in_user = user[0] if user else None
+    current_user = user[0] if user else 'User'
     
     if request.method == 'POST':
         user_id = session.get('user_id')
@@ -727,7 +741,7 @@ def confirm_receipt():
     parsed_data['imei_iccid_pairs'] = extract_imei_iccid_pairs(pdf_text)
     parsed_data['logged_in_user'] = logged_in_user
 
-    return render_template('confirm_receipt.html', **parsed_data)
+    return render_template('confirm_receipt.html', current_user=current_user, **parsed_data)
 
 @app.route('/view_receipts')
 def view_receipts():
@@ -817,6 +831,7 @@ def commission():
     cursor.execute("SELECT is_admin FROM users WHERE id = ?", (session['user_id'],))
     user = cursor.fetchone()
     is_admin = user and user[0] == 1
+    current_user = user[0] if user else 'User'
 
     if is_admin:
         cursor.execute('''
@@ -846,7 +861,8 @@ def commission():
         commission_data = cursor.fetchall()
         return render_template('commission.html', 
                              commission_data=commission_data, 
-                             is_admin=is_admin)
+                             is_admin=is_admin,
+                             current_user=current_user)
     else:
         cursor.execute('''
             SELECT 
@@ -887,7 +903,8 @@ def commission():
                              is_admin=is_admin,
                              accessories_total=accessories_total,
                              current_tier=current_tier,
-                             progress=progress)
+                             progress=progress,
+                             current_user=current_user)
 
 if __name__ == '__main__':
     with app.app_context():

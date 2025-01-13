@@ -2,25 +2,269 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Pending Approvals</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pending Accounts</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .navbar {
+            background: linear-gradient(90deg, transparent 0%, #43B02A 90%, #43B02A 100%);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo {
+            height: 70px;
+            width: auto;
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .nav-items {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-item {
+            position: relative;
+            color: white;
+            padding: 0.5rem;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: 500;
+            transition: transform 0.3s ease;
+        }
+
+        .main-content {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            padding-top: 100px;
+        }
+
+        .container {
+            background: white;
+            padding: 3.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            width: 100%;
+            max-width: 1000px;
+            text-align: center;
+            transition: box-shadow 0.3s ease;
+        }
+
+        .container:hover {
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        }
+
+        h1 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: rgb(67, 177, 43);
+            margin-bottom: 2rem;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .actions a {
+            padding: 0.875rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            background-color: rgb(38, 156, 224);
+            color: white;
+        }
+
+        .actions .logout {
+            background-color: transparent;
+            color: #dc3545;
+            border: 2px solid #dc3545;
+        }
+
+        .actions a:hover {
+            background-color: rgb(0, 62, 127);
+            transform: scale(1.02);
+            box-shadow: 0 4px 8px rgba(0, 62, 127, 0.2);
+        }
+
+        .actions .logout:hover {
+            background-color: #dc3545;
+            color: white;
+            box-shadow: 0 4px 8px rgba(220, 53, 69, 0.2);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .btn {
+            padding: 0.875rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            color: white;
+            transition: all 0.3s ease;
+            margin: 0.25rem;
+        }
+
+        .btn.approve {
+            background-color: #28a745;
+        }
+
+        .btn.reject {
+            background-color: #dc3545;
+        }
+
+        .btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 0.75rem 1rem;
+            }
+
+            .logo {
+                height: 40px;
+            }
+
+            .container {
+                padding: 2rem;
+                margin: 1rem;
+            }
+
+            .main-content {
+                padding: 1rem;
+                padding-top: 80px;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            th, td {
+                padding: 0.75rem;
+                font-size: 0.9rem;
+            }
+
+            .btn {
+                padding: 0.75rem;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
 </head>
 <body>
-    <h2>Accounts Pending Approval</h2>
-    <ul>
-        {% for user in users %}
-            <li>{{ user[0] }} - <form action="{{ url_for('approve_account', username=user[0]) }}" method="post">
-                <button type="submit">Approve</button>
-            </form></li>
-        {% endfor %}
-    </ul>
-    <form action="{{ url_for('approve_user_account', user_id=user_id) }}" method="post">
-        <p>Name: {{ user[1] }}</p>
-        <p>Email: {{ user[2] }}</p>
-        <p>Phone: {{ user[3] }}</p>
-        <label for="username">Assign Username:</label>
-        <input type="text" name="username" required>
-        <input type="hidden" name="user_id" value="{{ user[0] }}">
-        <button type="submit">Approve Account</button>
-    </form>
+    <nav class="navbar">
+        <div class="logo-container">
+            <img src="/static/logo.png" alt="Smart Touch Wireless" class="logo">
+        </div>
+        <div class="nav-items">
+            <a href="{{ url_for('admin_home') }}" class="nav-item">Admin Dashboard</a>
+            <a href="{{ url_for('logout') }}" class="nav-item">Logout</a>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="container">
+            <h1>Pending Accounts</h1>
+            <div class="actions">
+                <a href="{{ url_for('admin_home') }}">Return to Admin Dashboard</a>
+                <a href="{{ url_for('logout') }}" class="logout">Logout</a>
+            </div>
+            {% if pending_users %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in pending_users %}
+                    <tr>
+                        <td>{{ user[1] }}</td>
+                        <td>{{ user[2] }}</td>
+                        <td>{{ user[3] }}</td>
+                        <td>
+                            <form method="POST" action="{{ url_for('approve_account', user_id=user[0]) }}" style="display: inline;">
+                                <button type="submit" class="btn approve">Approve</button>
+                            </form>
+                            <form method="POST" action="{{ url_for('reject_account', user_id=user[0]) }}" style="display: inline;">
+                                <button type="submit" class="btn reject">Reject</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p>No pending accounts at this time.</p>
+            {% endif %}
+        </div>
+    </main>
 </body>
 </html>

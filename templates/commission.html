@@ -5,221 +5,330 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Commission</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+        * {
             margin: 0;
-            padding: 20px;
+            padding: 0;
             box-sizing: border-box;
+            font-family: Arial, sans-serif;
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
-        
-        *, *:before, *:after {
-            box-sizing: inherit;
+
+        /* Prevent text blur */
+        html {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            font-smoothing: antialiased;
         }
-        
-        .container {
-            width: 95%;
+
+        body {
+            perspective: 2000px;
+            background-color: #f5f5f5;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .navbar {
+            background: linear-gradient(90deg, transparent 0%, #43B02A 90%, #43B02A 100%);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            /* Reduced transform to prevent blur */
+            transform: translateZ(5px);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo {
+            height: 70px;
+            width: auto;
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .nav-items {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-item {
+            position: relative;
+            color: white;
+            padding: 0.5rem;
+            font-weight: 500;
+        }
+
+        .main-content {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 2rem;
+            padding-top: 120px;
+        }
+
+        .commission-container {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            width: 100%;
             max-width: 1200px;
-            margin: 0 auto;
-            background: #ffffff;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            /* Reduced transform to prevent blur */
+            transform: translateZ(5px);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
-        
+
+        .commission-container:hover {
+            transform: translateZ(10px);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.25);
+        }
+
         h1 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: rgb(67, 177, 43);
+            margin-bottom: 2rem;
             text-align: center;
-            color: #333;
-            font-size: 24px;
-            margin-bottom: 20px;
         }
-        
-        /* Table styles */
+
         .table-container {
             width: 100%;
             overflow-x: auto;
-            margin-bottom: 20px;
+            margin-bottom: 2rem;
+            /* Removed transform to prevent blur */
+            will-change: transform;
         }
-        
+
         table {
             width: 100%;
             border-collapse: collapse;
             white-space: nowrap;
-            min-width: 600px; /* Ensures table doesn't get too squeezed */
+            min-width: 600px;
         }
-        
+
         th {
-            background-color: #60a82c;
+            background: rgb(38, 156, 224);
             color: white;
-            padding: 12px;
+            padding: 1rem;
             text-align: center;
-            font-size: 14px;
-            white-space: nowrap;
+            font-size: 0.95rem;
+            font-weight: 500;
         }
-        
+
         td {
-            padding: 12px;
+            padding: 1rem;
             text-align: center;
-            border: 1px solid #ddd;
-            font-size: 14px;
+            border: 1px solid #e0e0e0;
+            font-size: 0.95rem;
+            background-color: white;
         }
-        
-        /* Tier progress styles */
+
+        tr:hover td {
+            background-color: #f8f9fa;
+        }
+
         .tier-container {
-            margin-top: 30px;
-            padding: 0 10px;
+            margin-top: 2rem;
+            padding: 0 1rem;
         }
-        
+
         .tier-header {
             text-align: center;
-            margin-bottom: 15px;
-            font-size: 18px;
-            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+            color: rgb(67, 177, 43);
+            font-weight: 500;
         }
-        
+
         .progress-container {
             width: 100%;
-            background-color: #eee;
+            background-color: #e0e0e0;
             height: 24px;
             border-radius: 12px;
-            margin: 15px 0;
+            margin: 1rem 0;
+            overflow: hidden;
         }
-        
+
         .progress-bar {
             height: 100%;
-            background-color: #60a82c;
+            background: linear-gradient(90deg, rgb(38, 156, 224) 0%, #43B02A 100%);
             border-radius: 12px;
             transition: width 0.3s ease;
         }
-        
+
         .tier-markers {
             display: flex;
             justify-content: space-between;
             padding: 0 10px;
             color: #666;
-            font-size: 14px;
+            font-size: 0.9rem;
         }
-        
+
         .tier-info {
             text-align: center;
-            margin-top: 15px;
+            margin-top: 1rem;
             color: #333;
-            font-size: 16px;
+            font-size: 1rem;
         }
-        
+
         .button-container {
             display: flex;
             justify-content: flex-end;
-            gap: 10px;
-            margin-top: 30px;
+            gap: 1rem;
+            margin-top: 2rem;
             flex-wrap: wrap;
         }
-        
+
         .nav-button {
-            padding: 12px 24px;
-            background-color: #60a82c;
-            color: white;
+            padding: 0.875rem 1.5rem;
             border: none;
-            border-radius: 5px;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            font-weight: bold;
             cursor: pointer;
+            transition: all 0.3s ease;
             text-decoration: none;
-            text-align: center;
-            font-size: 14px;
-            white-space: nowrap;
+            background-color: rgb(38, 156, 224);
+            color: white;
+            /* Removed transform to prevent blur */
+            will-change: transform;
         }
-        
+
         .nav-button:hover {
-            background-color: #4e8725;
+            background-color: rgb(0, 62, 127);
+            transform: scale(1.02);
+            box-shadow: 0 8px 16px rgba(0, 62, 127, 0.2);
         }
-        
-        /* Responsive adjustments */
+
+        .logout-btn {
+            background-color: transparent;
+            color: #dc3545;
+            border: 2px solid #dc3545;
+        }
+
+        .logout-btn:hover {
+            background-color: #dc3545;
+            color: white;
+            box-shadow: 0 8px 16px rgba(220, 53, 69, 0.2);
+        }
+
         @media (max-width: 768px) {
-            body {
-                padding: 10px;
+            .navbar {
+                padding: 0.75rem 1rem;
             }
-            
-            .container {
-                width: 100%;
-                padding: 15px;
+
+            .logo {
+                height: 40px;
             }
-            
+
+            .main-content {
+                padding: 1rem;
+                padding-top: 100px;
+            }
+
+            .commission-container {
+                padding: 1.5rem;
+            }
+
             h1 {
-                font-size: 20px;
+                font-size: 1.5rem;
             }
-            
-            .tier-markers {
-                font-size: 12px;
-            }
-            
+
             .button-container {
                 justify-content: center;
             }
-            
+
             .nav-button {
-                padding: 10px 20px;
-                font-size: 13px;
+                padding: 0.75rem 1.25rem;
+                font-size: 0.9rem;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>{% if is_admin %}Team Performance{% else %}My Commission{% endif %}</h1>
-        
-        <div class="table-container">
-            <table>
-                <tr>
-                    <th>Username</th>
-                    <th>Name</th>
-                    <th>Activations</th>
-                    <th>Upgrades</th>
-                    <th>Total Devices</th>
-                    <th>Accessories</th>
-                    <th>Current Tier</th>
-                </tr>
-                {% for row in commission_data %}
-                <tr>
-                    <td>{{ row[0] }}</td>
-                    <td>{{ row[1] }}</td>
-                    <td>{{ row[2] }}</td>
-                    <td>{{ row[3] }}</td>
-                    <td>{{ row[4] }}</td>
-                    <td>${{ "%.2f"|format(row[5]) }}</td>
-                    <td>{{ row[6] }}</td>
-                </tr>
-                {% endfor %}
-            </table>
+    <nav class="navbar">
+        <div class="logo-container">
+            <img src="/static/logo.png" alt="Smart Touch Wireless" class="logo">
         </div>
-
-        {% if not is_admin %}
-        <div class="tier-container">
-            <div class="tier-header">Accessory Sales Tier</div>
-            <div class="progress-container">
-                <div class="progress-bar" style="width: {{ progress }}%"></div>
-            </div>
-            <div class="tier-markers">
-                <span>$0</span>
-                <span>$500</span>
-                <span>$750</span>
-                <span>$1000</span>
-                <span>$1750</span>
-            </div>
-            <div class="tier-info">
-                Current Tier: {{ current_tier }}
-                {% if current_tier == 4 %}
-                <br>Maximum tier achieved! 🎯
-                {% endif %}
-            </div>
+        <div class="nav-items">
+            <div class="nav-item">Welcome, {{ current_user }}</div>
         </div>
-        {% endif %}
+    </nav>
 
-        <div class="button-container">
-            <a href="{{ url_for('non_admin_dashboard') }}" class="nav-button">Home</a>
+    <main class="main-content">
+        <div class="commission-container">
+            <h1>{% if is_admin %}Team Performance{% else %}My Commission{% endif %}</h1>
+            
+            <div class="table-container">
+                <table>
+                    <tr>
+                        <th>Username</th>
+                        <th>Name</th>
+                        <th>Activations</th>
+                        <th>Upgrades</th>
+                        <th>Total Devices</th>
+                        <th>Accessories</th>
+                        <th>Current Tier</th>
+                    </tr>
+                    {% for row in commission_data %}
+                    <tr>
+                        <td>{{ row[0] }}</td>
+                        <td>{{ row[1] }}</td>
+                        <td>{{ row[2] }}</td>
+                        <td>{{ row[3] }}</td>
+                        <td>{{ row[4] }}</td>
+                        <td>${{ "%.2f"|format(row[5]) }}</td>
+                        <td>{{ row[6] }}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+
             {% if not is_admin %}
-            <a href="{{ url_for('upload_pdf') }}" class="nav-button">Add Sale</a>
+            <div class="tier-container">
+                <div class="tier-header">Accessory Sales Tier</div>
+                <div class="progress-container">
+                    <div class="progress-bar" style="width: {{ progress }}%"></div>
+                </div>
+                <div class="tier-markers">
+                    <span>$0</span>
+                    <span>$500</span>
+                    <span>$750</span>
+                    <span>$1000</span>
+                    <span>$1750</span>
+                </div>
+                <div class="tier-info">
+                    Current Tier: {{ current_tier }}
+                    {% if current_tier == 4 %}
+                    <br>Maximum tier achieved! 🎯
+                    {% endif %}
+                </div>
+            </div>
             {% endif %}
-            <a href="{{ url_for('logout') }}" class="nav-button">Logout</a>
+
+            <div class="button-container">
+                <a href="{{ url_for('non_admin_dashboard') }}" class="nav-button">Home</a>
+                {% if not is_admin %}
+                <a href="{{ url_for('upload_pdf') }}" class="nav-button">Add Sale</a>
+                {% endif %}
+                <a href="{{ url_for('logout') }}" class="nav-button logout-btn">Logout</a>
+            </div>
         </div>
-    </div>
+    </main>
 </body>
 </html>

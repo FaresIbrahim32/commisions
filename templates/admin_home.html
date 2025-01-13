@@ -5,128 +5,195 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
     <style>
-        *, *:before, *:after {
-            box-sizing: inherit;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
         }
 
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 20px;
+            perspective: 2000px;
+            transform-style: preserve-3d;
+            background-color: #f5f5f5;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        * {
+            backface-visibility: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .navbar {
+            background: linear-gradient(90deg, transparent 0%, #43B02A 90%, #43B02A 100%);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transform: translateZ(20px);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo {
+            height: 70px;
+            width: auto;
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: translateZ(20px) scale(1.05);
+        }
+
+        .nav-items {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-item {
+            position: relative;
+            color: white;
+            padding: 0.5rem;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: 500;
+            transition: transform 0.3s ease;
+        }
+
+        .main-content {
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            box-sizing: border-box;
+            padding: 2rem;
+            padding-top: 100px;
+            transform-style: preserve-3d;
         }
 
-        .container {
-            width: 95%;
-            max-width: 400px;
+        .dashboard-container {
+            background: white;
+            padding: 3.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            width: 100%;
+            max-width: 500px;
             text-align: center;
-            background: #fff;
-            padding: 40px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            transform: translateZ(30px);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            transform-style: preserve-3d;
         }
 
-        h1 {
-            font-size: 24px;
-            color: #333;
-            margin-bottom: 30px;
-            margin-top: 0;
+        .dashboard-container:hover {
+            transform: translateZ(50px);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.25);
+        }
+
+        .dashboard-container h1 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: rgb(67, 177, 43);
+            margin-bottom: 2rem;
         }
 
         .button-container {
             display: flex;
             flex-direction: column;
-            gap: 15px;
-            width: 100%;
-            max-width: 300px;
-            margin: 0 auto;
+            gap: 1.5rem;
+            transform-style: preserve-3d;
         }
 
-        a, .button {
-            display: block;
-            font-size: 16px;
+        .dashboard-btn {
+            padding: 0.875rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
             text-decoration: none;
-            color: #333;
-            padding: 12px 20px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            background-color: #f8f8f8;
-            transition: background-color 0.3s, transform 0.2s;
+            transform: translateZ(20px);
+            background-color: rgb(38, 156, 224);
+            color: white;
+            display: block;
             width: 100%;
-            margin: 0 auto;
-            text-align: center;
         }
 
-        a:hover, .button:hover {
-            background-color: #ddd;
-            transform: translateY(-2px);
+        .dashboard-btn:hover {
+            background-color: rgb(0, 62, 127);
+            transform: translateZ(30px) scale(1.02);
+            box-shadow: 0 8px 16px rgba(0, 62, 127, 0.2);
         }
 
-        .logout {
+        .logout-btn {
+            background-color: transparent;
+            color: #dc3545;
+            border: 2px solid #dc3545;
+            margin-top: 1rem;
+        }
+
+        .logout-btn:hover {
             background-color: #dc3545;
             color: white;
-            border: none;
-            margin-top: 10px;
+            transform: translateZ(30px) scale(1.02);
+            box-shadow: 0 8px 16px rgba(220, 53, 69, 0.2);
         }
 
-        .logout:hover {
-            background-color: #c82333;
-        }
-
-        /* Mobile adjustments */
         @media (max-width: 768px) {
-            body {
-                padding: 15px;
-                align-items: flex-start;
+            .navbar {
+                padding: 0.75rem 1rem;
             }
 
-            .container {
-                padding: 25px 20px;
-                margin-top: 20px;
+            .logo {
+                height: 40px;
             }
 
-            h1 {
-                font-size: 22px;
-                margin-bottom: 25px;
+            .main-content {
+                padding: 1rem;
+                padding-top: 80px;
             }
 
-            a, .button {
-                font-size: 15px;
-                padding: 10px 15px;
-            }
-        }
-
-        /* Very small screens */
-        @media (max-width: 320px) {
-            .container {
-                padding: 20px 15px;
+            .dashboard-container {
+                padding: 2rem;
             }
 
-            h1 {
-                font-size: 20px;
-            }
-
-            a, .button {
-                font-size: 14px;
-                padding: 10px;
+            .dashboard-container h1 {
+                font-size: 1.5rem;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Admin Dashboard</h1>
-        <div class="button-container">
-            <a href="{{ url_for('employee_list') }}">Employee Management</a>
-            <a href="{{ url_for('commission') }}">Commission of All Employees</a>
-            <a href="#">Placeholder Link</a>
-            <a href="{{ url_for('logout') }}" class="button logout">Logout</a>
+    <nav class="navbar">
+        <div class="logo-container">
+            <img src="/static/logo.png" alt="Smart Touch Wireless" class="logo">
         </div>
-    </div>
+        
+        <div class="nav-items">
+            <div class="nav-item">Welcome, {{ current_user }}</div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="dashboard-container">
+            <h1>Admin Dashboard</h1>
+            <div class="button-container">
+                <a href="{{ url_for('employee_list') }}" class="dashboard-btn">Employee Management</a>
+                <a href="{{ url_for('commission') }}" class="dashboard-btn">Commissions</a>
+                <a href="#" class="dashboard-btn">Placeholder Link</a>
+                <a href="{{ url_for('logout') }}" class="dashboard-btn logout-btn">Logout</a>
+            </div>
+        </div>
+    </main>
 </body>
 </html>
