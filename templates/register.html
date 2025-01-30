@@ -1,24 +1,186 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .navbar {
+            background: linear-gradient(90deg, transparent 0%, #43B02A 90%, #43B02A 100%);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo {
+            height: 70px;
+            width: auto;
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .main-content {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            padding-top: 100px;
+        }
+
+        .container {
+            background: white;
+            padding: 3.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            width: 100%;
+            max-width: 500px;
+            transition: box-shadow 0.3s ease;
+        }
+
+        .container:hover {
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        }
+
+        h1 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: #43B02A;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #666;
+            font-weight: 500;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.875rem;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #43B02A;
+            box-shadow: 0 0 0 3px rgba(67, 176, 42, 0.1);
+        }
+
+        button {
+            width: 100%;
+            padding: 0.875rem;
+            background-color: #43B02A;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+
+        button:hover {
+            background-color: #378522;
+            transform: scale(1.02);
+            box-shadow: 0 4px 8px rgba(67, 176, 42, 0.2);
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 0.75rem 1rem;
+            }
+
+            .logo {
+                height: 40px;
+            }
+
+            .container {
+                padding: 2rem;
+                margin: 1rem;
+            }
+
+            .main-content {
+                padding: 1rem;
+                padding-top: 80px;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            input, button {
+                padding: 0.75rem;
+            }
+        }
+    </style>
 </head>
 <body>
-    <h1>Register</h1>
-    <form method="POST">
-        <label for="name">Name:</label>
-        <input type="text" id="name" name="name"   
- required><br><br>
+    <nav class="navbar">
+        <div class="logo-container">
+            <img src="/static/logo.png" alt="Smart Touch Wireless" class="logo">
+        </div>
+    </nav>
 
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" required><br><br>
+    <main class="main-content">
+        <div class="container">
+            <h1>Register</h1>
+            <form method="POST">
+                <div class="form-group">
+                    <label for="name">Name</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
 
-        <label for="phone">Phone   
- Number:</label>
-        <input type="tel" id="phone" name="phone" required><br><br>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
 
-        <button type="submit">Register</button>
-    </form>
-</body>   
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <input type="tel" id="phone" name="phone" pattern="[0-9]{10}" title="Please enter a valid 10-digit phone number" required>
+                </div>
 
+                <button type="submit">Register</button>
+            </form>
+        </div>
+    </main>
+</body>
 </html>

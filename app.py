@@ -1,18 +1,23 @@
-from flask import Flask, request, session, redirect, url_for, render_template, g
+from flask import Flask, request, session, flash, redirect, url_for, render_template, g, json, jsonify
 import re
 from flask_bcrypt import Bcrypt
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
-from datetime import timedelta
+from datetime import timedelta, datetime
 from typing import List, Dict, Tuple, Optional
 import sqlite3
 import PyPDF2
 import math
 import string
+import mysql.connector
 import random
 import os
-import json
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+from flask_mysqldb import MySQL
 import io
+from werkzeug.utils import secure_filename
+from functools import wraps
+
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
@@ -20,10 +25,58 @@ app.permanent_session_lifetime = timedelta(minutes=60)
 app.config['SESSION_COOKIE_SECURE'] = True  # For HTTPS
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+app.config['MYSQL_HOST'] = 'localhost'
+app.config['MYSQL_USER'] = 'root'
+app.config['MYSQL_PASSWORD'] = ''
+app.config['MYSQL_DB'] = 'smtc_tracker'
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
+app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads')
 
+if not os.path.exists(app.config['UPLOAD_FOLDER']):
+    os.makedirs(app.config['UPLOAD_FOLDER'])
+
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+
+app = Flask(__name__)
+app.secret_key = 'your_secret_key'  # make sure this exists
+
+# Initialize Flask-Login
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
+
+# Create User class
+class User(UserMixin):
+    def __init__(self, id, name, is_admin):
+        self.id = str(id)  # Flask-Login needs string ID
+        self.name = name
+        self.is_admin = is_admin
+
+    def get_id(self):
+        return self.id
+
+# User loader callback
+@login_manager.user_loader
+def load_user(user_id):
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute("SELECT id, name, is_admin FROM users WHERE id = ?", (user_id,))
+    user = cursor.fetchone()
+    if user:
+        return User(
+            id=user[0],
+            name=user[1],
+            is_admin=user[2]
+        )
+    return None
+
+mysql = MySQL(app)
 bcrypt = Bcrypt(app)
-limiter = Limiter(key_func=get_remote_address)
-limiter.init_app(app)
+limiter = Limiter(
+    app=app,
+    key_func=get_remote_address,
+    default_limits=["200 per day", "1000 per hour"]
+)
 
 DATABASE = '/data/users.db'
 os.makedirs('/data', exist_ok=True)  # Create the directory if it doesn't exist
@@ -90,6 +143,7 @@ def update_db():
             activation_fee_sum REAL,
             user_id INTEGER,
             date_submitted TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            imei_iccid_pairs TEXT,  -- Store as JSON string
             FOREIGN KEY(user_id) REFERENCES users(id)
         );
     ''')
@@ -113,6 +167,128 @@ def update_db():
 
     db.commit()
 
+ALLOWED_EXTENSIONS = {'pdf'}
+def allowed_file(filename):
+    """Check if the uploaded file has an allowed extension"""
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@app.route('/api/update_receipt/<string:rq_invoice>', methods=['POST'])
+@login_required
+def update_receipt_details(rq_invoice):
+    if not request.is_json:
+        return jsonify({'error': 'Content-Type must be application/json'}), 400
+
+    try:
+        db = get_db()
+        cursor = db.cursor()
+        
+        # Verify user has permission to edit this receipt
+        cursor.execute("""
+            SELECT user_id, imei_iccid_pairs
+            FROM parsed_receipts 
+            WHERE rq_invoice = ?
+        """, (rq_invoice,))
+        
+        receipt = cursor.fetchone()
+        
+        if not receipt:
+            return jsonify({'error': 'Receipt not found'}), 404
+        
+        updates = request.get_json()
+
+        # Prepare update query and values dynamically
+        update_columns = []
+        update_values = []
+
+        # Mapping of frontend field names to database column names
+        field_mapping = {
+            'store': 'company_name',
+            'customer': 'customer',
+            'order_date': 'order_date',
+            'sales_person': 'sales_person',
+            'total_price': 'total_price',
+            'accessories': 'accessory_prices',
+            'activation_fee': 'activation_fee_sum',
+            'upgrades': 'upgrades_count',
+            'activations': 'activations_count',
+            'ppp_present': 'ppp_present'
+        }
+
+        # Handle device info updates
+        if 'device_info' in updates:
+            try:
+                # Validate device info format
+                for device in updates['device_info']:
+                    if not isinstance(device, dict):
+                        return jsonify({'error': 'Invalid device info format'}), 400
+                    if not all(key in device for key in ['imei', 'iccid']):
+                        return jsonify({'error': 'Missing IMEI or ICCID'}), 400
+                    if not re.match(r'^\d{15}$', str(device['imei'])):
+                        return jsonify({'error': 'IMEI must be exactly 15 digits'}), 400
+                    if not re.match(r'^\d{19,20}$', str(device['iccid'])):
+                        return jsonify({'error': 'ICCID must be 19-20 digits'}), 400
+
+                # Store device info as JSON
+                device_info = json.dumps(updates['device_info'])
+                update_columns.append('imei_iccid_pairs = ?')
+                update_values.append(device_info)
+                del updates['device_info']
+            except (TypeError, ValueError) as e:
+                return jsonify({'error': f'Invalid device info format: {str(e)}'}), 400
+
+        # Process other updates
+        for frontend_field, value in updates.items():
+            # Map frontend field to database column
+            if frontend_field in field_mapping:
+                db_column = field_mapping[frontend_field]
+                update_columns.append(f'{db_column} = ?')
+                update_values.append(value)
+
+        # Construct and execute update query
+        if update_columns:
+            update_query = f"""
+                UPDATE parsed_receipts 
+                SET {', '.join(update_columns)}
+                WHERE rq_invoice = ?
+            """
+            update_values.append(rq_invoice)
+
+            cursor.execute(update_query, tuple(update_values))
+            db.commit()
+
+        return jsonify({'message': 'Receipt updated successfully'})
+
+    except Exception as e:
+        db.rollback()
+        print(f"Error updating receipt: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+    
+@app.route('/api/update_device_info/<int:receipt_id>', methods=['POST'])
+def update_device_info(receipt_id):
+    try:
+        data = request.json
+        
+        cursor = mysql.connection.cursor()
+        
+        # Update IMEI/ICCID pairs
+        for item in data:
+            if 'imei' in item and 'iccid' in item:
+                query = """
+                    UPDATE device_info 
+                    SET imei = %s, iccid = %s 
+                    WHERE receipt_id = %s AND id = %s
+                """
+                cursor.execute(query, (item['imei'], item['iccid'], receipt_id, item['id']))
+        
+        mysql.connection.commit()
+        cursor.close()
+        
+        return jsonify({'status': 'success', 'message': 'Device information updated successfully'})
+
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+    
 @app.route('/non_admin_dashboard')
 def non_admin_dashboard():
     if 'logged_in' not in session:
@@ -138,52 +314,6 @@ def non_admin_dashboard():
             return render_template('non_admin_dashboard.html', current_user=username)
     
     return redirect(url_for('admin_home'))# Redirect admins to their home page
-
-@app.route('/edit_receipt/<int:receipt_id>', methods=['GET', 'POST'])
-def edit_receipt(receipt_id):
-    if 'logged_in' not in session:
-        return redirect(url_for('login'))
-    
-    db = get_db()
-    cursor = db.cursor()
-
-    # Handle form submission for editing
-    if request.method == 'POST':
-        company_name = request.form['company_name']
-        customer = request.form['customer']
-        order_date = request.form['order_date']
-        sales_person = request.form['sales_person']
-        rq_invoice = request.form['rq_invoice']
-        total_price = float(request.form['total_price'])
-        # Add this line to handle accessory_prices
-        accessory_prices = request.form.get('accessory_prices', '')  # Default to empty string if missing
-        upgrades_count = int(request.form['upgrades_count'])
-        activations_count = int(request.form['activations_count'])
-        ppp_present = bool(request.form.get('ppp_present'))
-        activation_fee_sum = float(request.form['activation_fee_sum'])
-
-        # Update the receipt in the database
-        cursor.execute('''
-            UPDATE parsed_receipts
-            SET company_name = ?, customer = ?, order_date = ?, sales_person = ?, rq_invoice = ?,
-                total_price = ?, accessory_prices = ?, upgrades_count = ?, activations_count = ?,
-                ppp_present = ?, activation_fee_sum = ?
-            WHERE id = ?
-        ''', (company_name, customer, order_date, sales_person, rq_invoice, total_price, accessory_prices,
-              upgrades_count, activations_count, ppp_present, activation_fee_sum, receipt_id))
-        
-        db.commit()
-        return redirect(url_for('view_receipts'))
-    
-    cursor.execute("SELECT name FROM users WHERE id = ?", (session['user_id'],))
-    user = cursor.fetchone()
-    current_user = user[0] if user else 'User'
-
-    # Fetch the receipt data for editing
-    cursor.execute("SELECT * FROM parsed_receipts WHERE id = ?", (receipt_id,))
-    receipt = cursor.fetchone()
-    
-    return render_template('edit_receipt.html', receipt=receipt, current_user=current_user)
 
 @app.route('/delete_receipt/<int:receipt_id>', methods=['POST'])
 def delete_receipt(receipt_id):
@@ -279,27 +409,43 @@ def login():
         db = get_db()
         cursor = db.cursor()
         
-        cursor.execute("SELECT * FROM users WHERE username = ?", (username,))
-        user = cursor.fetchone()
+        cursor.execute("""
+            SELECT id, name, email, phone, username, password, approved, is_admin 
+            FROM users 
+            WHERE username = ?
+        """, (username,))
+        user_data = cursor.fetchone()
         
-        if user and bcrypt.check_password_hash(user[5], password):  # Assuming password is in the 3rd column
-            if user[6] == 1:  # Assuming approved status is in the 4th column
+        if user_data and bcrypt.check_password_hash(user_data[5], password):  # password is at index 5
+            if user_data[6] == 1:  # approved status at index 6
+                # Create User object
+                user = User(
+                    id=user_data[0],      # id
+                    name=user_data[1],    # name
+                    is_admin=user_data[7]  # is_admin status at index 7
+                )
+                
+                # Log in the user
+                login_user(user)
+                
+                # Set session variables
                 session.permanent = True
                 session['logged_in'] = True
                 session['username'] = username
-                session['user_id'] = user[0]
+                session['user_id'] = int(user_data[0])
                 
-                # Check if the user is an admin
-                if user[7] == 1:  # Assuming is_admin status is in the 5th column
+                if user_data[7] == 1:  # is_admin
                     session['admin'] = True
-                    return redirect(url_for('admin_home'))  # Redirect to the Admin Home Page
-
-                return redirect(url_for('non_admin_dashboard'))  # Redirect regular users to the PDF upload page
+                    return redirect(url_for('admin_home'))
+                
+                return redirect(url_for('non_admin_dashboard'))
             else:
-                return "Your account is pending approval. Please try again later."
+                flash("Your account is pending approval. Please try again later.", "error")
+                return redirect(url_for('login'))
         else:
-            return "Invalid credentials", 401
-
+            flash("Invalid username or password", "error")
+            return redirect(url_for('login'))
+        
     return render_template('login.html')
 
 # Home route
@@ -550,100 +696,132 @@ def upload_pdf():
     if 'logged_in' not in session:
         return redirect(url_for('login'))
 
-    if request.method == 'POST' and 'pdf' in request.files:
-        uploaded_file = request.files['pdf']
-        if uploaded_file and uploaded_file.filename.endswith('.pdf'):
-            # Store PDF text content
-            reader = PyPDF2.PdfReader(uploaded_file)
-            pdf_text = "".join(page.extract_text() for page in reader.pages)
-            session['pdf_text'] = pdf_text
-            
-            # Parse PDF data
-            (company_name, customer, order_date, sales_person, rq_invoice, 
-             total_price, accessories_prices, upgrades_count, activations_count, 
-             ppp_present, pairs, activation_fee_sum) = extract_info_from_pdf(uploaded_file)
-            
-            session['parsed_data'] = {
-                'company_name': company_name,
-                'customer': customer,
-                'order_date': order_date,
-                'sales_person': sales_person,
-                'rq_invoice': rq_invoice,
-                'total_price': total_price,
-                'accessories_prices': accessories_prices,
-                'upgrades_count': upgrades_count,
-                'activations_count': activations_count,
-                'ppp_present': ppp_present,
-                'activation_fee_sum': activation_fee_sum,
-                'imei_iccid_pairs': pairs
-            }
-            
-            return redirect(url_for('confirm_receipt'))
-    
-    elif request.method == 'POST':  # Handle the form submission for data entry
-        company_name = request.form['company_name']
-        customer = request.form['customer']
-        order_date = request.form['order_date']
-        sales_person = request.form['sales_person']
-        rq_invoice = request.form['rq_invoice']
-        total_price = request.form['total_price']
-        accessory_prices = request.form['accessory_prices']
-        upgrades_count = request.form['upgrades_count']
-        activations_count = request.form['activations_count']
-        ppp_present = request.form['ppp_present']
-        activation_fee_sum = request.form['activation_fee_sum']
-
-        # Ensure parsed data exists, if user comes from PDF parsing page
-        if 'parsed_data' in session:
-            parsed_data = session['parsed_data']
-            company_name = parsed_data['company_name']
-            customer = parsed_data['customer']
-            order_date = parsed_data['order_date']
-            sales_person = parsed_data['sales_person']
-            rq_invoice = parsed_data['rq_invoice']
-            total_price = parsed_data['total_price']
-            accessory_prices = parsed_data['accessories_prices']
-            upgrades_count = parsed_data['upgrades_count']
-            activations_count = parsed_data['activations_count']
-            ppp_present = parsed_data['ppp_present']
-            activation_fee_sum = parsed_data['activation_fee_sum']
-        
-        # Get the username from the session (assuming the username is stored in session)
-        username = session.get('username')  # Retrieve the username from session
-
-        # Check if username is available in the session
-        if not username:
-            return redirect(url_for('login'))  # If no username in session, redirect to login
-
-        # Save the parsed data into the database with the current user's username
+    # Handle GET request - return the upload form template
+    if request.method == 'GET':
+        # Get logged in user's name for the template
         db = get_db()
         cursor = db.cursor()
+        cursor.execute("SELECT name FROM users WHERE id = ?", (session['user_id'],))
+        user = cursor.fetchone()
+        current_user = user[0] if user else 'User'
+        return render_template('upload.html', current_user=current_user)
+    
+    # Handle POST request - file upload
+    try:
+        print("Request files:", request.files)
+        
+        if 'pdf[]' not in request.files and 'pdf' not in request.files:
+            print("No files in request")
+            return jsonify({'error': 'No files were uploaded'}), 400
 
-        cursor.execute(''' 
-            INSERT INTO parsed_receipts (company_name, customer, order_date, sales_person, 
-                                         rq_invoice, total_price, accessory_prices, upgrades_count,
-                                         activations_count, ppp_present, activation_fee_sum, username)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (company_name, customer, order_date, sales_person, rq_invoice, total_price, 
-              accessory_prices, upgrades_count, activations_count, ppp_present, activation_fee_sum, username))
+        # Handle both multiple and single file uploads
+        if 'pdf[]' in request.files:
+            files = request.files.getlist('pdf[]')
+        else:
+            files = [request.files['pdf']]
 
-        db.commit()
+        if not files or not any(file.filename for file in files):
+            print("No files selected")
+            return jsonify({'error': 'No files selected'}), 400
 
-        # After storing, clear the session's parsed data (optional cleanup step)
-        session.pop('parsed_data', None)
+        uploaded_files = []
+        errors = []
+        parsed_data_list = []
+        
+        print(f"Processing {len(files)} files")
+        
+        for file in files:
+            if file and file.filename and allowed_file(file.filename):
+                try:
+                    filename = secure_filename(file.filename)
+                    print(f"Processing file: {filename}")
+                    
+                    # Read file content
+                    file_content = file.read()
+                    file_stream = io.BytesIO(file_content)
+                    
+                    # Process PDF
+                    reader = PyPDF2.PdfReader(file_stream)
+                    pdf_text = "".join(page.extract_text() for page in reader.pages)
+                    
+                    # Reset file stream for extract_info_from_pdf
+                    file_stream.seek(0)
+                    
+                    # Extract information
+                    (company_name, customer, order_date, sales_person, rq_invoice, 
+                     total_price, accessories_prices, upgrades_count, activations_count, 
+                     ppp_present, pairs, activation_fee_sum) = extract_info_from_pdf(file_stream)
+                    
+                    parsed_data = {
+                        'filename': filename,
+                        'company_name': company_name,
+                        'customer': customer,
+                        'order_date': order_date,
+                        'sales_person': sales_person,
+                        'rq_invoice': rq_invoice,
+                        'total_price': total_price,
+                        'accessories_prices': accessories_prices,
+                        'upgrades_count': upgrades_count,
+                        'activations_count': activations_count,
+                        'ppp_present': ppp_present,
+                        'activation_fee_sum': activation_fee_sum,
+                        'imei_iccid_pairs': pairs,
+                        'pdf_text': pdf_text
+                    }
+                    
+                    parsed_data_list.append(parsed_data)
+                    uploaded_files.append(filename)
+                    print(f"Successfully processed {filename}")
+                    
+                except Exception as e:
+                    print(f"Error processing {file.filename}: {str(e)}")
+                    errors.append(f"Error processing {file.filename}: {str(e)}")
+            else:
+                error_msg = f"Invalid file: {file.filename if file.filename else 'No file selected'}"
+                print(error_msg)
+                errors.append(error_msg)
 
-        return redirect(url_for('view_receipts'))
+        if not parsed_data_list:
+            if errors:
+                return jsonify({'error': ' | '.join(errors)}), 400
+            return jsonify({'error': 'No valid files were processed'}), 400
 
-    # If it's a GET request, render the upload page
-    return render_template('upload.html')
+        # Store the list of parsed data in session
+        session['parsed_data_list'] = parsed_data_list
+        session['current_pdf_index'] = 0
 
+        response_data = {
+            'status': 'success',
+            'message': f'Successfully processed {len(uploaded_files)} files',
+            'uploaded': uploaded_files,
+            'redirect': url_for('confirm_receipt')
+        }
+        print("Sending response:", response_data)
+        return jsonify(response_data)
+        
+    except Exception as e:
+        print(f"Unexpected error: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+    
 @app.route('/confirm', methods=['GET', 'POST'])
 def confirm_receipt():
     if 'logged_in' not in session:
-        return redirect(url_for('login') + '?session_expired=true')
+        return redirect(url_for('login'))
     
-    if 'parsed_data' not in session or 'pdf_text' not in session:
+    if 'parsed_data_list' not in session:
         return redirect(url_for('upload_pdf'))
+    
+    parsed_data_list = session.get('parsed_data_list', [])
+    current_index = session.get('current_pdf_index', 0)
+    
+    if current_index >= len(parsed_data_list):
+        # All PDFs have been processed
+        session.pop('parsed_data_list', None)
+        session.pop('current_pdf_index', None)
+        return redirect(url_for('view_receipts'))
+    
+    # Get current PDF data
+    current_pdf = parsed_data_list[current_index]
     
     # Get logged in user's name
     db = get_db()
@@ -651,14 +829,12 @@ def confirm_receipt():
     cursor.execute("SELECT name FROM users WHERE id = ?", (session['user_id'],))
     user = cursor.fetchone()
     logged_in_user = user[0] if user else None
-    current_user = user[0] if user else 'User'
     
     if request.method == 'POST':
-        user_id = session.get('user_id')
-        if not user_id:
+        if not session.get('user_id'):
             return redirect(url_for('login'))
         
-        # Get form data
+        # Process form data
         form_data = {
             'company_name': request.form.get('company_name', 'N/A'),
             'customer': request.form.get('customer', 'N/A'),
@@ -672,11 +848,14 @@ def confirm_receipt():
             'ppp_present': 'ppp_present' in request.form,
             'activation_fee_sum': float(request.form.get('activation_fee_sum', 0))
         }
+
+        imei_iccid_pairs = current_pdf.get('imei_iccid_pairs', [])
         
-        # Get IMEI/ICCID pairs from session and convert to JSON string
-        imei_iccid_pairs = session.get('parsed_data', {}).get('imei_iccid_pairs', [])
+        # Convert pairs to JSON string for storage
         imei_iccid_json = json.dumps(imei_iccid_pairs)
         
+        
+        # Save to database
         cursor.execute('''
             INSERT INTO parsed_receipts (
                 company_name, customer, order_date, sales_person, rq_invoice, 
@@ -688,77 +867,54 @@ def confirm_receipt():
             form_data['sales_person'], form_data['rq_invoice'], form_data['total_price'],
             form_data['accessories_prices'], form_data['upgrades_count'],
             form_data['activations_count'], form_data['ppp_present'],
-            form_data['activation_fee_sum'], user_id, imei_iccid_json
+            form_data['activation_fee_sum'], session['user_id'], imei_iccid_json
         ))
         
         db.commit()
-        session.pop('parsed_data', None)
-        return redirect(url_for('view_receipts'))
-    
-    if request.method == 'POST':
-        user_id = session.get('user_id')
-        if not user_id:
-            return redirect(url_for('login'))
         
-        # Get form data
-        form_data = {
-            'company_name': request.form.get('company_name', 'N/A'),
-            'customer': request.form.get('customer', 'N/A'),
-            'order_date': request.form.get('order_date', 'N/A'),
-            'sales_person': request.form.get('sales_person', 'N/A'),
-            'rq_invoice': request.form.get('rq_invoice', 'N/A'),
-            'total_price': float(request.form.get('total_price', 0)),
-            'accessories_prices': request.form.get('accessories_prices', ''),
-            'upgrades_count': int(request.form.get('upgrades_count', 0)),
-            'activations_count': int(request.form.get('activations_count', 0)),
-            'ppp_present': 'ppp_present' in request.form,
-            'activation_fee_sum': float(request.form.get('activation_fee_sum', 0))
-        }
+        # Move to next PDF
+        session['current_pdf_index'] = current_index + 1
         
-        # Insert into database
-        cursor.execute('''
-            INSERT INTO parsed_receipts (
-                company_name, customer, order_date, sales_person, rq_invoice, 
-                total_price, accessory_prices, upgrades_count, activations_count, 
-                ppp_present, activation_fee_sum, user_id
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (
-            form_data['company_name'], form_data['customer'], form_data['order_date'],
-            form_data['sales_person'], form_data['rq_invoice'], form_data['total_price'],
-            form_data['accessories_prices'], form_data['upgrades_count'],
-            form_data['activations_count'], form_data['ppp_present'],
-            form_data['activation_fee_sum'], user_id
-        ))
+        if current_index + 1 >= len(parsed_data_list):
+            # All PDFs processed
+            session.pop('parsed_data_list', None)
+            session.pop('current_pdf_index', None)
+            return redirect(url_for('view_receipts'))
         
-        db.commit()
-        session.pop('parsed_data', None)
-        return redirect(url_for('view_receipts'))
+        return redirect(url_for('confirm_receipt'))
     
-    # GET request
-    parsed_data = session['parsed_data']
-    pdf_text = session['pdf_text']
+    # For GET request, display the current PDF's data
+    current_pdf['logged_in_user'] = logged_in_user
+    total_pdfs = len(parsed_data_list)
+    current_number = current_index + 1
     
-    parsed_data['imei_iccid_pairs'] = extract_imei_iccid_pairs(pdf_text)
-    parsed_data['logged_in_user'] = logged_in_user
-
-    return render_template('confirm_receipt.html', current_user=current_user, **parsed_data)
+    return render_template('confirm_receipt.html', 
+                         current_user=logged_in_user,
+                         total_pdfs=total_pdfs,
+                         current_pdf_number=current_number,
+                         **current_pdf)
 
 @app.route('/view_receipts')
 def view_receipts():
     if 'logged_in' not in session:
         return redirect(url_for('login'))
-
+    
     db = get_db()
     cursor = db.cursor()
+
+    # Get the current user's name
+    cursor.execute("SELECT name FROM users WHERE id = ?", (session['user_id'],))
+    user_data = cursor.fetchone()
+    current_user = user_data[0] if user_data else 'User'
 
     # Fetch user details to check if the logged-in user is an admin
     cursor.execute("SELECT * FROM users WHERE id = ?", (session['user_id'],))
     user = cursor.fetchone()
-
+    
     if user and user[7] == 1:  # Admin user
         cursor.execute("""
             SELECT 
-            r.*, u.name as uploader_name
+             r.*, u.name as uploader_name
             FROM parsed_receipts r
             LEFT JOIN users u ON r.user_id = u.id
             ORDER BY r.date_submitted DESC
@@ -766,14 +922,14 @@ def view_receipts():
     else:
         cursor.execute("""
             SELECT 
-            r.*, u.name as uploader_name
+             r.*, u.name as uploader_name
             FROM parsed_receipts r
             LEFT JOIN users u ON r.user_id = u.id
             WHERE r.user_id = ?
         """, (session['user_id'],))
-
+    
     receipts = cursor.fetchall()
-    return render_template('view_receipts.html', receipts=receipts)
+    return render_template('view_receipts.html', receipts=receipts, current_user=current_user)
 
 @app.route('/receipt_details/<string:rq_invoice>')
 def receipt_details(rq_invoice):
@@ -784,15 +940,29 @@ def receipt_details(rq_invoice):
     cursor = db.cursor()
 
     # Fetch user details to check if admin
-    cursor.execute("SELECT * FROM users WHERE id = ?", (session['user_id'],))
+    cursor.execute("SELECT id, name, is_admin FROM users WHERE id = ?", (session['user_id'],))
     user = cursor.fetchone()
-    is_admin = user and user[7] == 1
+    is_admin = user and user[2] == 1
+    current_user = user[1] if user else 'User'
 
     # Fetch receipt details
     if is_admin:
         cursor.execute("""
             SELECT 
-            r.*, u.name as uploader_name
+                r.id,
+                r.company_name,
+                r.customer,
+                r.order_date,
+                r.sales_person,
+                r.rq_invoice,
+                r.total_price,
+                r.accessory_prices,
+                r.upgrades_count,
+                r.activations_count,
+                r.ppp_present,
+                r.activation_fee_sum,
+                r.imei_iccid_pairs,
+                u.name as uploader_name
             FROM parsed_receipts r
             LEFT JOIN users u ON r.user_id = u.id
             WHERE r.rq_invoice = ?
@@ -800,7 +970,20 @@ def receipt_details(rq_invoice):
     else:
         cursor.execute("""
             SELECT 
-            r.*, u.name as uploader_name
+                r.id,
+                r.company_name,
+                r.customer,
+                r.order_date,
+                r.sales_person,
+                r.rq_invoice,
+                r.total_price,
+                r.accessory_prices,
+                r.upgrades_count,
+                r.activations_count,
+                r.ppp_present,
+                r.activation_fee_sum,
+                r.imei_iccid_pairs,
+                u.name as uploader_name
             FROM parsed_receipts r
             LEFT JOIN users u ON r.user_id = u.id
             WHERE r.rq_invoice = ? AND r.user_id = ?
@@ -811,13 +994,13 @@ def receipt_details(rq_invoice):
         return "Receipt not found", 404
     
     imei_iccid_pairs = []
-    if receipt and receipt[-1]:  # Assuming imei_iccid_pairs is the last column
+    if receipt and receipt[12]:  # Assuming imei_iccid_pairs is the last column
         try:
-            imei_iccid_pairs = json.loads(receipt[-1])
+            imei_iccid_pairs = json.loads(receipt[12])
         except (json.JSONDecodeError, TypeError):
             pass
 
-    return render_template('receipt_details.html', receipt=receipt, imei_iccid_pairs=imei_iccid_pairs)
+    return render_template('receipt_details.html', receipt=receipt, imei_iccid_pairs=imei_iccid_pairs, current_user=current_user)
 
 @app.route('/commission')
 def commission():

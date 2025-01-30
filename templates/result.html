@@ -2,72 +2,273 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Parsed Receipt Details</title>
     <style>
-        body {
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
             font-family: Arial, sans-serif;
-            margin: 20px;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .navbar {
+            background: linear-gradient(90deg, transparent 0%, #43B02A 90%, #43B02A 100%);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo {
+            height: 70px;
+            width: auto;
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .nav-items {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-item {
+            position: relative;
+            color: white;
+            padding: 0.5rem;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: 500;
+            transition: transform 0.3s ease;
+        }
+
+        .main-content {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            padding-top: 100px;
+        }
+
+        .container {
+            background: white;
+            padding: 3.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            width: 100%;
+            max-width: 800px;
+            transition: box-shadow 0.3s ease;
+        }
+
+        .container:hover {
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        }
+
+        h1 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: #43B02A;
+            margin-bottom: 2rem;
             text-align: center;
         }
-        h1 {
-            color: #333;
-        }
+
         .data-container {
-            max-width: 600px;
-            margin: 0 auto;
-            text-align: left;
-            background-color: #f8f8f8;
-            padding: 20px;
+            background: #f8f8f8;
+            padding: 2rem;
             border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
         }
-        .data-container p {
-            font-size: 16px;
-            margin: 10px 0;
+
+        .data-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #ddd;
         }
-        .links {
-            margin-top: 20px;
+
+        .data-row:last-child {
+            border-bottom: none;
         }
-        .links a {
+
+        .label {
+            font-weight: bold;
+            color: #666;
+        }
+
+        .value {
+            color: #333;
+            text-align: right;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.875rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
             text-decoration: none;
-            margin: 0 10px;
-            padding: 10px 20px;
-            color: #fff;
-            border-radius: 5px;
-            background-color: #4CAF50;
-            transition: background-color 0.3s;
+            transition: all 0.3s ease;
+            background-color: #43B02A;
+            color: white;
         }
-        .links a.logout {
+
+        .btn:hover {
+            background-color: #378522;
+            transform: scale(1.02);
+            box-shadow: 0 4px 8px rgba(67, 176, 42, 0.2);
+        }
+
+        .btn.logout {
+            background-color: transparent;
+            color: #dc3545;
+            border: 2px solid #dc3545;
+        }
+
+        .btn.logout:hover {
             background-color: #dc3545;
+            color: white;
+            box-shadow: 0 4px 8px rgba(220, 53, 69, 0.2);
         }
-        .links a:hover {
-            background-color: #3e8e41;
-        }
-        .links a.logout:hover {
-            background-color: #c82333;
+
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 0.75rem 1rem;
+            }
+
+            .logo {
+                height: 40px;
+            }
+
+            .container {
+                padding: 2rem;
+                margin: 1rem;
+            }
+
+            .main-content {
+                padding: 1rem;
+                padding-top: 80px;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .data-row {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .value {
+                text-align: left;
+            }
+
+            .actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                text-align: center;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>Parsed Receipt Details</h1>
-    <div class="data-container">
-        <p><strong>Store Name:</strong> {{ company_name }}</p>
-        <p><strong>Customer:</strong> {{ customer }}</p>
-        <p><strong>Order Date:</strong> {{ order_date }}</p>
-        <p><strong>Sales Person:</strong> {{ sales_person }}</p>
-        <p><strong>Invoice Number:</strong> {{ rq_invoice }}</p>
-        <p><strong>Total Price:</strong> {{ total_price }}</p>
-        <p><strong>Accessory Prices:</strong> {{ accessories_prices }}</p>
-        <p><strong>Upgraded Lines:</strong> {{ upgrades_count }}</p>
-        <p><strong>Activated Lines:</strong> {{ activations_count }}</p>
-        <p><strong>PPP Present:</strong> {{ ppp_present }}</p>
-        <p><strong>Total Activation Fee:</strong> {{ activation_fee_sum }}</p>
-    </div>
+    <nav class="navbar">
+        <div class="logo-container">
+            <img src="/static/logo.png" alt="Smart Touch Wireless" class="logo">
+        </div>
+        <div class="nav-items">
+            <div class="nav-item">Welcome, {{ current_user }}</div>
+            <a href="{{ url_for('logout') }}" class="nav-item">Logout</a>
+        </div>
+    </nav>
 
-    <div class="links">
-        <a href="{{ url_for('view_receipts') }}">View All Receipts</a>
-        <a href="{{ url_for('upload_pdf') }}">Upload Another PDF</a>
-        <a href="{{ url_for('logout') }}" class="logout">Logout</a>
-    </div>
+    <main class="main-content">
+        <div class="container">
+            <h1>Parsed Receipt Details</h1>
+            <div class="data-container">
+                <div class="data-row">
+                    <span class="label">Store Name:</span>
+                    <span class="value">{{ company_name }}</span>
+                </div>
+                <div class="data-row">
+                    <span class="label">Customer:</span>
+                    <span class="value">{{ customer }}</span>
+                </div>
+                <div class="data-row">
+                    <span class="label">Order Date:</span>
+                    <span class="value">{{ order_date }}</span>
+                </div>
+                <div class="data-row">
+                    <span class="label">Sales Person:</span>
+                    <span class="value">{{ sales_person }}</span>
+                </div>
+                <div class="data-row">
+                    <span class="label">Invoice Number:</span>
+                    <span class="value">{{ rq_invoice }}</span>
+                </div>
+                <div class="data-row">
+                    <span class="label">Total Price:</span>
+                    <span class="value">{{ total_price }}</span>
+                </div>
+                <div class="data-row">
+                    <span class="label">Accessory Prices:</span>
+                    <span class="value">{{ accessories_prices }}</span>
+                </div>
+                <div class="data-row">
+                    <span class="label">Upgraded Lines:</span>
+                    <span class="value">{{ upgrades_count }}</span>
+                </div>
+                <div class="data-row">
+                    <span class="label">Activated Lines:</span>
+                    <span class="value">{{ activations_count }}</span>
+                </div>
+                <div class="data-row">
+                    <span class="label">PPP Present:</span>
+                    <span class="value">{{ ppp_present }}</span>
+                </div>
+                <div class="data-row">
+                    <span class="label">Total Activation Fee:</span>
+                    <span class="value">{{ activation_fee_sum }}</span>
+                </div>
+            </div>
+
+            <div class="actions">
+                <a href="{{ url_for('view_receipts') }}" class="btn">View All Receipts</a>
+                <a href="{{ url_for('upload_pdf') }}" class="btn">Upload Another PDF</a>
+                <a href="{{ url_for('logout') }}" class="btn logout">Logout</a>
+            </div>
+        </div>
+    </main>
 </body>
 </html>

@@ -2,114 +2,654 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Employee Home - Upload PDF</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            perspective: 2000px;
+            transform-style: preserve-3d;
+            background-color: #f5f5f5;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        * {
+            backface-visibility: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .navbar {
+            background: linear-gradient(90deg, transparent 0%, #43B02A 90%, #43B02A 100%);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transform: translateZ(20px);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo {
+            height: 70px;
+            width: auto;
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: translateZ(20px) scale(1.05);
+        }
+
+        .nav-items {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-item {
+            position: relative;
+            color: white;
+            padding: 0.5rem;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: 500;
+            transition: transform 0.3s ease;
+        }
+
+        .main-content {
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
+            padding: 2rem;
+            padding-top: 100px;
+            transform-style: preserve-3d;
         }
+
         .container {
-            background-color: #ffffff;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            background: white;
+            padding: 3.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            width: 100%;
+            max-width: 500px;
             text-align: center;
-            width: 300px;
+            transform: translateZ(30px);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            transform-style: preserve-3d;
         }
+
+        .container:hover {
+            transform: translateZ(50px);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.25);
+        }
+
         h1 {
-            color: #333;
-            font-size: 24px;
-            margin-bottom: 20px;
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: rgb(67, 177, 43);
+            margin-bottom: 2rem;
         }
+
         .btn-container {
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 1rem;
+            transform-style: preserve-3d;
         }
+
         .btn {
-            padding: 12px 20px;
+            padding: 0.875rem;
             border: none;
-            border-radius: 5px;
-            font-size: 16px;
-            color: #ffffff;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: all 0.3s ease;
             text-decoration: none;
+            transform: translateZ(20px);
+            background-color: rgb(38, 156, 224);
+            color: white;
+            display: block;
+            width: 100%;
         }
+
+        .btn:hover {
+            background-color: rgb(0, 62, 127);
+            transform: translateZ(30px) scale(1.02);
+            box-shadow: 0 8px 16px rgba(0, 62, 127, 0.2);
+        }
+
         .btn-upload {
             background-color: #60a82c;
         }
+
+        .btn-upload:hover {
+            background-color: #4e8725;
+        }
+
         .btn-view {
-            background-color: #007bff;
+            background-color: rgb(38, 156, 224);
         }
+
+        .btn-home {
+            background-color: transparent;
+            color: rgb(38, 156, 224);
+            border: 2px solid rgb(38, 156, 224);
+            margin-top: .5rem;
+        }
+
+        .btn-home:hover {
+            background-color: rgb(38, 156, 224);
+            color: white;
+            transform: translateZ(30px) scale(1.02);
+            box-shadow: 0 8px 16px rgba(0, 62, 127, 0.2);
+        }
+
+
         .btn-logout {
+            background-color: transparent;
+            color: #dc3545;
+            border: 2px solid #dc3545;
+            margin-top: .5rem;
+        }
+
+        .btn-logout:hover {
             background-color: #dc3545;
+            color: white;
+            transform: translateZ(30px) scale(1.02);
+            box-shadow: 0 8px 16px rgba(220, 53, 69, 0.2);
         }
-        .btn:hover {
-            opacity: 0.85;
-        }
+
         .upload-form {
             margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            transform-style: preserve-3d;
         }
+
         input[type="file"] {
             display: none;
         }
-        label {
+
+        .upload-label {
             cursor: pointer;
             color: #ffffff;
             background-color: #60a82c;
-            padding: 10px 20px;
-            border-radius: 5px;
-            transition: background-color 0.3s;
+            padding: 0.875rem;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            display: block;
+            transform: translateZ(20px);
+            font-weight: bold;
         }
-        label:hover {
+
+        .upload-label:hover {
             background-color: #4e8725;
+            transform: translateZ(30px) scale(1.02);
+            box-shadow: 0 8px 16px rgba(94, 135, 37, 0.2);
         }
+
         .filename {
-            margin-top: 10px;
+            margin: 10px 0;
+            padding: 8px;
             font-size: 14px;
+            color: #666;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            word-break: break-all;
+            transform: translateZ(10px);
+            display: none;
+        }
+
+        .filename.visible {
+            display: block;
+        }
+
+        .submit-btn {
+            display: none;
+        }
+
+        .submit-btn.visible {
+            display: block;
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 14px;
+            margin-top: 5px;
+            transform: translateZ(10px);
+            display: none;
+        }
+
+        .upload-icon {
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading {
+            position: relative;
+            pointer-events: none;
+        }
+
+        .loading::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            top: 50%;
+            left: 50%;
+            margin-top: -8px;
+            margin-left: -8px;
+            border: 2px solid #ffffff;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        .drop-zone {
+            width: 100%;
+            min-height: 150px;
+            border: 2px dashed #60a82c;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            position: relative;
+            transform: translateZ(20px);
+            transition: all 0.3s ease;
+            background: rgba(96, 168, 44, 0.05);
+            cursor: pointer;
+            padding: 20px;
+            margin-bottom: 1rem;
+        }
+
+        .drop-zone.dragover {
+            background: rgba(96, 168, 44, 0.1);
+            border-color: #4e8725;
+            transform: translateZ(30px) scale(1.02);
+        }
+
+        .drop-zone-text {
+            font-size: 1.1rem;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .drop-zone-subtext {
+            font-size: 0.9rem;
+            color: #888;
+        }
+        .selected-files {
+            width: 100%;
+            margin-top: 1rem;
+            transform: translateZ(10px);
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.5rem;
+            background: #f8f9fa;
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .file-item:hover {
+            background: #f0f0f0;
+            transform: translateZ(5px);
+        }
+
+        .file-name {
+            flex-grow: 1;
+            margin-right: 1rem;
+            font-size: 0.9rem;
             color: #333;
         }
-    </style>
-    <script>
-        function showFilename() {
-            const fileInput = document.getElementById('pdf');
-            const fileLabel = document.getElementById('fileLabel');
-            const filenameDisplay = document.getElementById('filenameDisplay');
-            
-            // Display the file name in the label or below the label
-            if (fileInput.files.length > 0) {
-                fileLabel.textContent = fileInput.files[0].name;  // Option 1: replace the label text
-                // filenameDisplay.textContent = fileInput.files[0].name;  // Option 2: show it below the label
+
+        .remove-file {
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 0.25rem 0.5rem;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+        }
+
+        .remove-file:hover {
+            background: #c82333;
+            transform: translateZ(5px);
+        }
+
+        .upload-progress {
+            width: 100%;
+            height: 4px;
+            background: #f0f0f0;
+            border-radius: 2px;
+            margin-top: 0.25rem;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: #60a82c;
+            width: 0;
+            transition: width 0.3s ease;
+        }
+
+        .total-size {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 0.5rem;
+        }
+
+        .drop-zone-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: #60a82c;
+        }
+
+        /* Adjust the upload form styles */
+        .upload-form {
+            margin-top: 0;
+        }
+
+        .upload-label {
+            display: none; /* Hide the original upload button */
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 0.75rem 1rem;
+            }
+
+            .logo {
+                height: 40px;
+            }
+
+            .main-content {
+                padding: 1rem;
+                padding-top: 80px;
+            }
+
+            .container {
+                padding: 2rem;
+            }
+
+            h1 {
+                font-size: 1.5rem;
             }
         }
-    </script>
+    </style>
 </head>
 <body>
-    <div class="container">
-        <div class="btn-container">
-            <!-- View Stored Receipts Button -->
-            <a href="{{ url_for('view_receipts') }}" class="btn btn-view">View Stored Receipts</a>
-            
-            <!-- Upload PDF Form -->
-            <form action="{{ url_for('upload_pdf') }}" method="POST" enctype="multipart/form-data" class="upload-form">
-                <input type="file" name="pdf" id="pdf" accept=".pdf" required onchange="showFilename()">
-                <label for="pdf" id="fileLabel">Upload PDF</label>
-                <!-- Uncomment the next line if you prefer the filename to be shown below the button instead -->
-                <!-- <div id="filenameDisplay" class="filename"></div> -->
-                <button type="submit" class="btn btn-upload">Submit</button>
-            </form>
-            
-            <!-- Logout Button -->
-            <a href="{{ url_for('logout') }}" class="btn btn-logout">Logout</a>
+    <nav class="navbar">
+        <div class="logo-container">
+            <img src="/static/logo.png" alt="Smart Touch Wireless" class="logo">
         </div>
-    </div>
+        <div class="nav-items">
+            <div class="nav-item">Welcome, {{ current_user }}</div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="container">
+            <h1>Employee Dashboard</h1>
+            <div class="btn-container">
+                <a href="{{ url_for('view_receipts') }}" class="btn btn-view">
+                    <span class="upload-icon">📋</span>View Stored Receipts
+                </a>
+                
+                <form action="{{ url_for('upload_pdf') }}" method="POST" enctype="multipart/form-data" class="upload-form" id="uploadForm">
+                    <input type="file" name="pdf" id="pdf" accept=".pdf" required multiple>
+                    
+                    <div class="drop-zone" id="dropZone">
+                        <div class="drop-zone-icon">📄</div>
+                        <div class="drop-zone-text">Drag and drop PDF file here</div>
+                        <div class="drop-zone-subtext">or click to select multiple files</div>
+                    </div>
+
+                    <div id="selectedFiles" class="selected-files"></div>
+                    <div id="totalSize" class="total-size"></div>
+                    <div id="errorMessage" class="error-message"></div>
+                    <button type="submit" class="btn btn-upload submit-btn" id="submitButton">
+                        Upload Receipts
+                    </button>
+                </form>
+                <a href="{{ url_for('non_admin_dashboard') }}" class="btn btn-home">Home</a>
+                <a href="{{ url_for('logout') }}" class="btn btn-logout">
+                    <span class="upload-icon">🚪</span>Logout
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('pdf');
+const selectedFiles = document.getElementById('selectedFiles');
+const submitButton = document.getElementById('submitButton');
+const errorMessage = document.getElementById('errorMessage');
+const uploadForm = document.getElementById('uploadForm');
+const totalSizeDisplay = document.getElementById('totalSize');
+
+let filesArray = new Set();
+
+// Prevent default drag behaviors
+['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+    dropZone.addEventListener(eventName, preventDefaults, false);
+    document.body.addEventListener(eventName, preventDefaults, false);
+});
+
+// Highlight drop zone when dragging over it
+['dragenter', 'dragover'].forEach(eventName => {
+    dropZone.addEventListener(eventName, highlight, false);
+});
+
+['dragleave', 'drop'].forEach(eventName => {
+    dropZone.addEventListener(eventName, unhighlight, false);
+});
+
+// Handle dropped files
+dropZone.addEventListener('drop', handleDrop, false);
+
+// Handle click to select files
+dropZone.addEventListener('click', () => {
+    fileInput.click();
+});
+
+fileInput.addEventListener('change', handleFileSelect);
+
+function preventDefaults(e) {
+    e.preventDefault();
+    e.stopPropagation();
+}
+
+function highlight(e) {
+    dropZone.classList.add('dragover');
+}
+
+function unhighlight(e) {
+    dropZone.classList.remove('dragover');
+}
+
+function handleDrop(e) {
+    const dt = e.dataTransfer;
+    const files = dt.files;
+    handleFiles(Array.from(files));
+}
+
+function handleFileSelect(event) {
+    handleFiles(Array.from(event.target.files));
+}
+
+function handleFiles(newFiles) {
+    newFiles.forEach(file => {
+        if (validateFile(file)) {
+            filesArray.add(file);
+        }
+    });
+    updateFilesList();
+    updateTotalSize();
+}
+
+function validateFile(file) {
+    if (!file.type.includes('pdf')) {
+        showError(`${file.name} is not a PDF file`);
+        return false;
+    }
+    
+    if (file.size > 10 * 1024 * 1024) { // 10MB limit
+        showError(`${file.name} exceeds 10MB size limit`);
+        return false;
+    }
+
+    return true;
+}
+
+function removeFile(fileName) {
+    filesArray = new Set(Array.from(filesArray).filter(file => file.name !== fileName));
+    updateFilesList();
+    updateTotalSize();
+}
+
+function updateFilesList() {
+    selectedFiles.innerHTML = '';
+    const files = Array.from(filesArray);
+
+    files.forEach(file => {
+        const fileItem = document.createElement('div');
+        fileItem.className = 'file-item';
+        fileItem.innerHTML = `
+            <span class="file-name">${file.name}</span>
+            <button type="button" class="remove-file" onclick="removeFile('${file.name}')">Remove</button>
+            <div class="upload-progress">
+                <div class="progress-bar"></div>
+            </div>
+        `;
+        selectedFiles.appendChild(fileItem);
+    });
+
+    // Show/hide submit button based on files
+    submitButton.style.display = files.length > 0 ? 'block' : 'none';
+}
+
+function updateTotalSize() {
+    const totalSize = Array.from(filesArray).reduce((acc, file) => acc + file.size, 0);
+    const sizeMB = (totalSize / (1024 * 1024)).toFixed(2);
+    totalSizeDisplay.textContent = `Total Size: ${sizeMB}MB`;
+}
+
+function showError(message) {
+    errorMessage.textContent = message;
+    errorMessage.style.display = 'block';
+    errorMessage.style.backgroundColor = '#f8d7da';
+    errorMessage.style.color = '#721c24';
+    errorMessage.style.padding = '1rem';
+    errorMessage.style.borderRadius = '4px';
+    setTimeout(() => {
+        errorMessage.style.display = 'none';
+    }, 3000);
+}
+
+function showSuccess(message) {
+    errorMessage.textContent = message;
+    errorMessage.style.display = 'block';
+    errorMessage.style.backgroundColor = '#d4edda';
+    errorMessage.style.color = '#155724';
+    errorMessage.style.padding = '1rem';
+    errorMessage.style.borderRadius = '4px';
+    setTimeout(() => {
+        errorMessage.style.display = 'none';
+    }, 3000);
+}
+
+// Form submission handler
+uploadForm.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    if (filesArray.size === 0) {
+        showError('Please select at least one file to upload');
+        return;
+    }
+
+    submitButton.classList.add('loading');
+    submitButton.textContent = 'Uploading...';
+    submitButton.disabled = true;
+
+    try {
+        const formData = new FormData();
+        
+        // Add each file to FormData with the correct field name
+        Array.from(filesArray).forEach(file => {
+            formData.append('pdf[]', file);
+        });
+
+        const response = await fetch(uploadForm.action, {
+            method: 'POST',
+            body: formData
+        });
+
+        let result;
+        const responseText = await response.text();
+        
+        try {
+            result = JSON.parse(responseText);
+        } catch (parseError) {
+            console.error('JSON parse error:', parseError);
+            console.log('Raw response:', responseText);
+            throw new Error('Server returned an invalid response format');
+        }
+
+        if (!response.ok) {
+            throw new Error(result.error || 'Upload failed');
+        }
+
+        if (result.redirect) {
+            showSuccess(result.message || 'Files uploaded successfully!');
+            setTimeout(() => {
+                window.location.href = result.redirect;
+            }, 1000);
+        } else {
+            showSuccess(result.message || 'Files uploaded successfully!');
+            // Reset the form
+            filesArray = new Set();
+            updateFilesList();
+            updateTotalSize();
+            fileInput.value = ''; // Clear the file input
+        }
+    } catch (error) {
+        console.error('Upload error:', error);
+        showError(error.message || 'Upload failed. Please try again.');
+    } finally {
+        submitButton.classList.remove('loading');
+        submitButton.textContent = 'Upload Receipts';
+        submitButton.disabled = false;
+    }
+});
+    </script>
 </body>
 </html>
- 

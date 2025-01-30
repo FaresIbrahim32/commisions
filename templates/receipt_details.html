@@ -2,184 +2,827 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Receipt Details</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 20px;
+    * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background-color: #f5f5f5;
+    min-height: 100vh;
+    overflow-x: hidden;
+    padding-top: 120px; /* Prevent content from going under navbar */
+}
+
+.navbar {
+    background: linear-gradient(90deg, transparent 0%, #43B02A 90%, #43B02A 100%);
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+}
+
+.logo {
+    height: 70px;
+    width: auto;
+    transition: transform 0.3s ease;
+}
+
+.logo:hover {
+    transform: scale(1.05);
+}
+
+.nav-items {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+}
+
+.nav-item {
+    position: relative;
+    color: white;
+    padding: 0.5rem;
+    cursor: pointer;
+    text-decoration: none;
+    font-weight: 500;
+    transition: transform 0.3s ease;
+}
+
+.container {
+    background: white;
+    padding: 3.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    width: 100%;
+    max-width: 1600px; /* Increased max-width to accommodate side-by-side layout */
+    margin: 0 auto;
+    transition: box-shadow 0.3s ease;
+}
+
+.container:hover {
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+}
+
+.content-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+}
+
+h1 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: rgb(67, 177, 43);
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.receipt-details, .section {
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 1.5rem;
+    transition: box-shadow 0.3s ease;
+    position: relative;
+}
+
+.receipt-details:hover, .section:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.section h2 {
+    color: #43B02A;
+    margin-bottom: 1.5rem;
+    font-size: 1.25rem;
+}
+
+.field {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #eee;
+    transition: background-color 0.3s ease;
+}
+
+.field:hover {
+    background-color: #f9f9f9;
+}
+
+.field-label {
+    font-weight: bold;
+    color: #666;
+    flex: 0 0 40%;
+}
+
+.field-value {
+    color: #333;
+    flex: 0 0 60%;
+    text-align: right;
+}
+
+.edit-btn, .save-btn, .cancel-btn, .add-device-btn, .remove-btn {
+    padding: 0.875rem;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-left: 0.5rem;
+}
+
+.edit-btn {
+    background-color: rgb(38, 156, 224);
+    color: white;
+    top: 1rem;
+    right: 1rem;
+}
+
+.edit-btn:hover {
+    background-color: rgb(0, 62, 127);
+    transform: scale(1.02);
+    box-shadow: 0 4px 8px rgba(0, 62, 127, 0.2);
+}
+
+.edit-input {
+    padding: 0.875rem;
+    border: 1px solid #43B02A;
+    border-radius: 6px;
+    width: 100%;
+}
+
+.device-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 20px 0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.device-table th {
+    background: linear-gradient(90deg, #43B02A, #60a82c);
+    color: white;
+    padding: 1rem;
+    text-align: left;
+    font-weight: 500;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    letter-spacing: 0.5px;
+}
+
+.device-table td {
+    padding: 1rem;
+    border-bottom: 1px solid #eee;
+}
+
+.device-table tr:hover {
+    background-color: #f5f5f5;
+}
+
+.actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 1.5rem;
+}
+
+.save-btn {
+    background-color: #28a745;
+    color: white;
+}
+
+.save-btn:hover {
+    background-color: #218838;
+    transform: scale(1.02);
+    box-shadow: 0 4px 8px rgba(40, 167, 69, 0.2);
+}
+
+.cancel-btn {
+    background-color: #dc3545;
+    color: white;
+}
+
+.cancel-btn:hover {
+    background-color: #c82333;
+    transform: scale(1.02);
+    box-shadow: 0 4px 8px rgba(220, 53, 69, 0.2);
+}
+
+.add-device-btn {
+    background-color: rgb(38, 156, 224);
+    color: white;
+}
+
+.add-device-btn:hover {
+    background-color: rgb(0, 62, 127);
+    transform: scale(1.02);
+    box-shadow: 0 4px 8px rgba(0, 62, 127, 0.2);
+}
+
+.remove-btn {
+    background-color: #dc3545;
+    color: white;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+}
+
+.remove-btn:hover {
+    background-color: #c82333;
+    transform: scale(1.02);
+    box-shadow: 0 4px 8px rgba(220, 53, 69, 0.2);
+}
+
+.success-message, .error-message {
+    padding: 1rem;
+    border-radius: 6px;
+    margin-top: 1rem;
+    display: none;
+}
+
+.success-message {
+    background: #d4edda;
+    color: #155724;
+}
+
+.error-message {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.link-bar {
+            margin-top: 2rem;
             display: flex;
             justify-content: center;
-            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
         }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: #ffffff;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        }
-        h1 {
-            text-align: center;
-            color: #333;
-            font-size: 26px;
-            margin-bottom: 20px;
-        }
-        .info-section {
-            margin-bottom: 20px;
-            padding: 15px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-            padding: 5px 0;
-            border-bottom: 1px solid #eee;
-        }
-        .label {
-            font-weight: bold;
-            color: #666;
-        }
-        .value {
-            color: #333;
-        }
-        .money {
-            font-family: 'Courier New', monospace;
-            text-align: right;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-        }
-        table, th, td {
-            border: 1px solid #ddd;
-            padding: 12px;
-            text-align: left;
-        }
-        th {
-            background-color: #60a82c;
-            color: #ffffff;
-        }
-        .back-btn {
-            display: inline-block;
-            padding: 10px 20px;
-            background-color: #60a82c;
-            color: #ffffff;
+
+        .link-bar a {
             text-decoration: none;
-            border-radius: 5px;
-            margin-top: 20px;
+            padding: 0.875rem 1.5rem;
+            color: white;
+            border-radius: 6px;
+            background-color: #43B02A;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            min-width: 140px;
             text-align: center;
         }
-        .back-btn:hover {
-            background-color: #4e8725;
+
+        .link-bar a:hover {
+            background-color: #378f22;
+            transform: scale(1.05);
         }
-    </style>
+
+@media (max-width: 768px) {
+    body {
+        padding-top: 60px;
+    }
+
+    .navbar {
+        padding: 0.75rem 1rem;
+        height: 50px;
+    }
+
+    .logo {
+        height: 40px;
+    }
+
+    .container {
+        padding: 2rem;
+        margin: 1rem;
+    }
+
+    .content-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    h1 {
+        font-size: 1.5rem;
+    }
+
+    .receipt-details, .section {
+        padding: 1rem;
+    }
+
+    .field {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .field-label, .field-value {
+        text-align: left;
+        flex: 1;
+    }
+
+    .edit-btn {
+        position: static;
+        width: 100%;
+        margin-bottom: 1rem;
+    }
+
+    .device-table {
+        min-width: auto;
+    }
+
+    .actions {
+        flex-direction: row;
+        gap: 0.5rem;
+    }
+
+    .save-btn, .cancel-btn, .add-device-btn, .remove-btn {
+        width: 100%;
+        margin: 0.25rem 0;
+    }
+}
+</style>
 </head>
 <body>
+    <nav class="navbar">
+        <div class="logo-container">
+            <img src="/static/logo.png" alt="Logo" class="logo">
+        </div>
+        <div class="nav-items">
+            <span class="nav-item">Welcome, {{ current_user }}</span>
+            <a href="{{ url_for('logout') }}" class="nav-item">Logout</a>
+            <a href="{{ url_for('non_admin_dashboard') }}" class="nav-item">Home</a>
+        </div>
+    </nav>
+
     <div class="container">
         <h1>Receipt Details</h1>
         
-        <div class="info-section">
-            <h2 style="color: #60a82c; margin-bottom: 15px;">Main Information</h2>
-            <div class="info-row">
-                <span class="label">Invoice Number: </span>
-                <span class="value">{{ receipt[5] }}</span>
+        <div class="content-grid">
+            <div class="receipt-details">
+                <div class="actions">
+                    <button class="save-btn" onclick="handleSave('receipt-details')">Save</button>
+                    <button class="cancel-btn" onclick="handleCancel('receipt-details')">Cancel</button>
+                    <button class="edit-btn" onclick="handleEdit('receipt-details')">Edit</button>
+                </div>
+                <div class="field">
+                    <span class="field-label">Store:</span>
+                    <span class="field-value" data-field="store">{{ receipt[1] }}</span>
+                </div>
+                <div class="field">
+                    <span class="field-label">Customer:</span>
+                    <span class="field-value" data-field="customer">{{ receipt[2] }}</span>
+                </div>
+                <div class="field">
+                    <span class="field-label">Order Date:</span>
+                    <span class="field-value" data-field="order_date">{{ receipt[3] }}</span>
+                </div>
+                <div class="field">
+                    <span class="field-label">Sales Person:</span>
+                    <span class="field-value" data-field="sales_person">{{ receipt[4] }}</span>
+                </div>
+                <div class="field">
+                    <span class="field-label">Invoice Number:</span>
+                    <span class="field-value" data-field="invoice_number">{{ receipt[5] }}</span>
+                </div>
+                
+                <!-- Financial Information Section -->
+                <div class="field">
+                    <span class="field-label">Total Price:</span>
+                    <span class="field-value" data-field="total_price">${{ "%.2f"|format(receipt[6]|float if receipt[6] is not none else 0) }}</span>
+                </div>
+                <div class="field">
+                    <span class="field-label">Accessories:</span>
+                    <span class="field-value" data-field="accessories">{{ receipt[7] }}</span>
+                </div>
+                <div class="field">
+                    <span class="field-label">Activation Fee:</span>
+                    <span class="field-value" data-field="activation_fee">${{ "%.2f"|format(receipt[11]|float if receipt[11] is not none else 0) }}</span>
+                </div>
+                
+                <!-- Service Information Section -->
+                <div class="field">
+                    <span class="field-label">Upgrades:</span>
+                    <span class="field-value" data-field="upgrades">{{ receipt[8]|int if receipt[8] is not none else 0 }}</span>
+                </div>
+                <div class="field">
+                    <span class="field-label">Activations:</span>
+                    <span class="field-value" data-field="activations">{{ receipt[9]|int if receipt[9] is not none else 0 }}</span>
+                </div>
+                <div class="field">
+                    <span class="field-label">PPP Present:</span>
+                    <span class="field-value" data-field="ppp_present">{{ 'Yes' if receipt[10] else 'No' }}</span>
+                </div>
+                <div class="success-message"></div>
+                <div class="error-message"></div>
             </div>
-            <div class="info-row">
-                <span class="label">Store:</span>
-                <span class="value">{{ receipt[1] }}</span>
-            </div>
-            <div class="info-row">
-                <span class="label">Customer:</span>
-                <span class="value">{{ receipt[2] }}</span>
-            </div>
-            <div class="info-row">
-                <span class="label">Order Date:</span>
-                <span class="value">{{ receipt[3] }}</span>
-            </div>
-            <div class="info-row">
-                <span class="label">Sales Person:</span>
-                <span class="value">{{ receipt[4] }}</span>
-            </div>
-        </div>
 
-        <div class="info-section">
-            <h2 style="color: #60a82c; margin-bottom: 15px;">Accessories</h2>
-            <div class="info-row">
-                <span class="label">Accessories Total:</span>
-                <span class="value money">${{ "%.2f"|format(receipt[6] or 0) }}</span>
-            </div>
-        </div>
-
-        <div class="info-section">
-            <h2 style="color: #60a82c; margin-bottom: 15px;">Device Information</h2>
-            <div class="info-row">
-                <span class="label">Upgrades:</span>
-                <span class="value">{{ receipt[8] }}</span>
-            </div>
-            <div class="info-row">
-                <span class="label">Activations:</span>
-                <span class="value">{{ receipt[9] }}</span>
-            </div>
-            <div class="info-row">
-                <span class="label">Activation Fee:</span>
-                <span class="value money">${{ "%.2f"|format(receipt[11] or 0) }}</span>
-            </div>
-            <div class="info-row">
-                <span class="label">PPP Present:</span>
-                <span class="value">{{ 'Yes' if receipt[10] else 'No' }}</span>
-            </div>
-        </div>
-
-        {% if imei_iccid_pairs %}
-        <div class="info-section">
-            <h2 style="color: #60a82c; margin-bottom: 15px;">IMEI/ICCID Pairs</h2>
-            <table>
-                <tr>
-                    <th>IMEI</th>
-                    <th>ICCID</th>
-                </tr>
-                {% for pair in imei_iccid_pairs %}
-                <tr>
-                    <td>{{ pair.imei }}</td>
-                    <td>{{ pair.iccid }}</td>
-                </tr>
-                {% endfor %}
-            </table>
-        </div>
-        {% endif %}
-
-        <a href="{{ url_for('view_receipts') }}" class="back-btn">Back to Receipts</a>
-    </div>
-    <div class="info-section">
-        <h2 style="color: #60a82c; margin-bottom: 15px;">IMEI/ICCID Information</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>IMEI</th>
-                    <th>ICCID</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% if imei_iccid_pairs %}
-                    {% for pair in imei_iccid_pairs %}
+            <div class="section" id="device-info">
+                <h2>Device Information</h2>
+                <table class="device-table">
+                    <thead>
                         <tr>
-                            <td>{{ pair.imei }}</td>
-                            <td>{{ pair.iccid }}</td>
+                            <th>IMEI</th>
+                            <th>ICCID</th>
+                            <th class="action-column hidden">Actions</th>
                         </tr>
-                    {% endfor %}
-                {% else %}
-                    <tr>
-                        <td colspan="2" style="text-align: center;">No IMEI/ICCID pairs found</td>
-                    </tr>
-                {% endif %}
-            </tbody>
-        </table>
-    </div>
+                    </thead>
+                    <tbody id="device-pairs">
+                        {% for pair in imei_iccid_pairs %}
+                        <tr>
+                            <td class="field-value" data-field="imei">{{ pair.imei }}</td>
+                            <td class="field-value" data-field="iccid">{{ pair.iccid }}</td>
+                            <td class="action-column hidden">
+                                <button class="remove-btn" onclick="removeDevice(this)">Remove</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <div class="actions">
+                    <button class="save-btn" onclick="handleSave('device-info')">Save</button>
+                    <button class="cancel-btn" onclick="handleCancel('device-info')">Cancel</button>
+                    <button class="edit-btn" onclick="handleEdit('device-info')">Edit</button>
+                </div>
+                <div class="success-message"></div>
+                <div class="error-message"></div>
+            </div>
+        </div>
+    
+            <div class="link-bar">
+                <a href="{{ url_for('upload_pdf') }}">Upload Receipt</a>            
+            <a href="{{ url_for('view_receipts') }}">View Stored Receipts</a>
+
+</div>
+    <script>
+        function handleEdit(sectionId) {
+            const section = document.getElementById(sectionId) || document.querySelector(`.${sectionId}`);
+            const editBtn = section.querySelector('.edit-btn');
+            const fields = section.querySelectorAll('.field-value');
+            const actions = section.querySelector('.actions');
+            
+            editBtn.style.display = 'none';
+            actions.style.display = 'block';
+
+            fields.forEach(field => {
+        const currentValue = field.textContent.trim();
+        const input = document.createElement('input');
+        input.type = getInputType(field.dataset.field);
+        input.className = 'edit-input';
+        
+        // Special handling for date field
+        if (field.dataset.field === 'order_date') {
+            // Store the original formatted date
+            input.dataset.original = currentValue;
+            
+            // Try to parse the date into YYYY-MM-DD format for the date input
+            try {
+                const dateParts = currentValue.split('-');
+                if (dateParts.length >= 3) {
+                    // Handle the specific date format from your data
+                    const month = {
+                        'Jan': '01', 'Feb': '02', 'Mar': '03', 'Apr': '04',
+                        'May': '05', 'Jun': '06', 'Jul': '07', 'Aug': '08',
+                        'Sep': '09', 'Oct': '10', 'Nov': '11', 'Dec': '12'
+                    }[dateParts[1]] || dateParts[1];
+                    
+                    // Extract just the date part if there's a time component
+                    const day = dateParts[0].padStart(2, '0');
+                    const year = dateParts[2].split(' ')[0];
+                    
+                    input.value = `${year}-${month}-${day}`;
+                } else {
+                    input.value = currentValue;
+                }
+            } catch (e) {
+                console.error('Date parsing error:', e);
+                input.value = currentValue;
+            }
+        } else {
+            // Handle non-date fields
+            input.value = currentValue.startsWith('$') ? currentValue.substring(1) : currentValue;
+        }
+        
+        input.dataset.original = currentValue;
+
+        // Add validation for specific fields
+        switch(field.dataset.field) {
+            case 'imei':
+                input.pattern = '[0-9]{15}';
+                input.title = 'IMEI must be 15 digits';
+                break;
+            case 'iccid':
+                input.pattern = '[0-9]{19,20}';
+                input.title = 'ICCID must be 19-20 digits';
+                break;
+            case 'total_price':
+            case 'activation_fee':
+                input.type = 'number';
+                input.step = '0.01';
+                input.min = '0';
+                break;
+            case 'upgrades':
+            case 'activations':
+                input.type = 'number';
+                input.min = '0';
+                break;
+        }
+
+        field.innerHTML = '';
+        field.appendChild(input);
+    });
+
+    if (sectionId === 'device-info') {
+        document.querySelectorAll('.action-column').forEach(col => col.classList.remove('hidden'));
+    }
+}
+
+        function getInputType(field) {
+            switch(field) {
+                case 'ppp_present':
+                    return 'checkbox';
+                case 'order_date':
+                    return 'date';
+                default:
+                    return 'text';
+            }
+        }
+
+        function handleSave(sectionId) {
+            const section = document.getElementById(sectionId) || document.querySelector(`.${sectionId}`);
+            const rqInvoice = "{{ receipt[5] }}";
+            const updates = {};
+
+            if (!section) {
+                console.error(`Section with id or class ${sectionId} not found`);
+                return;
+            }
+
+            if (sectionId === 'device-info') {
+                const devices = [];
+                const rows = section.querySelectorAll('tbody tr');
+                
+                rows.forEach(row => {
+                    const imeiInput = row.querySelector('[data-field="imei"] input');
+                    const iccidInput = row.querySelector('[data-field="iccid"] input');
+                    
+                    if (imeiInput && iccidInput) {
+                        // Validate IMEI/ICCID
+                        if (!/^\d{15}$/.test(imeiInput.value)) {
+                            showError(section, 'IMEI must be exactly 15 digits');
+                            return;
+                        }
+                        if (!/^\d{19,20}$/.test(iccidInput.value)) {
+                            showError(section, 'ICCID must be 19-20 digits');
+                            return;
+                        }
+                        
+                        devices.push({
+                            imei: imeiInput.value,
+                            iccid: iccidInput.value
+                        });
+                    }
+                });
+                
+                if (devices.length > 0) {
+                    updates.device_info = devices;
+                }
+            } else {
+                section.querySelectorAll('.field-value').forEach(field => {
+                    const input = field.querySelector('input');
+                    if (input) {
+                        let value = input.value;
+                        // Special handling for different field types
+                        switch(field.dataset.field) {
+                            case 'ppp_present':
+                                value = input.checked ? 1 : 0;
+                                break;
+                            case 'total_price':
+                            case 'activation_fee':
+                                value = parseFloat(value).toFixed(2);
+                                break;
+                            case 'upgrades':
+                            case 'activations':
+                                value = parseInt(value);
+                                break;
+                        }
+                        updates[field.dataset.field] = value;
+                    }
+                });
+            }
+
+            fetch(`/api/update_receipt/${rqInvoice}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(updates)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => Promise.reject(err));
+                }
+                return response.json();
+            })
+            .then(data => {
+            updateDisplay(section, updates);
+            showSuccess(section, 'Changes saved successfully');
+        })
+        .catch(error => {
+            console.error('Error:', error);  // Debug log
+            showError(section, error.error || 'Failed to save changes');
+        });
+    }
+
+    function updateDisplay(section, updates) {
+            if (updates.device_info) {
+                const tbody = document.getElementById('device-pairs');
+                tbody.innerHTML = '';
+                updates.device_info.forEach(device => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td class="field-value" data-field="imei">${device.imei}</td>
+                        <td class="field-value" data-field="iccid">${device.iccid}</td>
+                        <td class="action-column hidden">
+                            <button class="remove-btn" onclick="removeDevice(this)">Remove</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } else {
+                section.querySelectorAll('.field-value').forEach(field => {
+                    const input = field.querySelector('input');
+                    if (input) {
+                        let displayValue = input.value;
+                        
+                        // Formatting for different field types
+                        switch(field.dataset.field) {
+                            case 'total_price':
+                            case 'activation_fee':
+                                displayValue = '$' + parseFloat(displayValue).toFixed(2);
+                                break;
+                            case 'ppp_present':
+                                displayValue = input.checked ? 'Yes' : 'No';
+                                break;
+                        }
+                        
+                        field.textContent = displayValue;
+                    }
+                });
+            }
+
+            const editBtn = section.querySelector('.edit-btn');
+            const actions = section.querySelector('.actions');
+            editBtn.style.display = 'block';
+            actions.style.display = 'none';
+
+            if (section.id === 'device-info') {
+                document.querySelectorAll('.action-column').forEach(col => col.classList.add('hidden'));
+            }
+        }
+
+        function handleCancel(sectionId) {
+    const section = document.getElementById(sectionId) || document.querySelector(`.${sectionId}`);
+    const editBtn = section.querySelector('.edit-btn');
+    const fields = section.querySelectorAll('.field-value');
+    const actions = section.querySelector('.actions');
+
+    editBtn.style.display = 'block';
+    actions.style.display = 'none';
+
+    fields.forEach(field => {
+        const input = field.querySelector('input');
+        if (input) {
+            // Use the original value stored in the dataset
+            field.textContent = input.dataset.original;
+        }
+    });
+
+    if (sectionId === 'device-info') {
+        document.querySelectorAll('.action-column').forEach(col => col.classList.add('hidden'));
+    }
+}
+
+        function addDevice() {
+            const tbody = document.getElementById('device-pairs');
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td class="field-value" data-field="imei">
+                    <input type="text" class="edit-input" pattern="[0-9]{15}" title="IMEI must be 15 digits" placeholder="Enter 15-digit IMEI">
+                </td>
+                <td class="field-value" data-field="iccid">
+                    <input type="text" class="edit-input" pattern="[0-9]{19,20}" title="ICCID must be 19-20 digits" placeholder="Enter 19-20 digit ICCID">
+                </td>
+                <td class="action-column">
+                    <button class="remove-btn" onclick="removeDevice(this)">Remove</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        }
+
+        function removeDevice(button) {
+            const row = button.closest('tr');
+            row.remove();
+        }
+
+        function updateDisplay(section, updates) {
+    if (updates.device_info) {
+        const tbody = document.getElementById('device-pairs');
+        tbody.innerHTML = '';
+        updates.device_info.forEach(device => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="field-value" data-field="imei">${device.imei}</td>
+                <td class="field-value" data-field="iccid">${device.iccid}</td>
+                <td class="action-column hidden">
+                    <button class="remove-btn" onclick="removeDevice(this)">Remove</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    } else {
+        section.querySelectorAll('.field-value').forEach(field => {
+            const input = field.querySelector('input');
+            if (input) {
+                let displayValue;
+                
+                if (field.dataset.field === 'order_date') {
+                    // If the date wasn't changed, use the original value
+                    if (input.value === '') {
+                        displayValue = input.dataset.original;
+                    } else {
+                        // Format the new date value
+                        try {
+                            const date = new Date(input.value);
+                            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+                                         'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                            displayValue = `${date.getDate()}-${months[date.getMonth()]}-${date.getFullYear()}`;
+                        } catch (e) {
+                            displayValue = input.dataset.original;
+                        }
+                    }
+                } else {
+                    displayValue = input.value;
+                    // Format currency fields
+                    if (field.dataset.field.includes('price') || field.dataset.field.includes('fee')) {
+                        displayValue = '$' + parseFloat(displayValue).toFixed(2);
+                    }
+                }
+                
+                field.textContent = displayValue;
+            }
+        });
+    }
+
+    const editBtn = section.querySelector('.edit-btn');
+    const actions = section.querySelector('.actions');
+    editBtn.style.display = 'block';
+    actions.style.display = 'none';
+
+    if (section.id === 'device-info') {
+        document.querySelectorAll('.action-column').forEach(col => col.classList.add('hidden'));
+    }
+}
+
+        function showSuccess(section, message) {
+            const successDiv = section.querySelector('.success-message');
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+            setTimeout(() => {
+                successDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        function showError(section, message) {
+            const errorDiv = section.querySelector('.error-message');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        // Utility function to validate IMEI/ICCID formats
+        function validateDeviceNumbers(input) {
+            const field = input.closest('.field-value').dataset.field;
+            const value = input.value.trim();
+            
+            if (field === 'imei') {
+                return /^\d{15}$/.test(value);
+            } else if (field === 'iccid') {
+                return /^\d{19,20}$/.test(value);
+            }
+            return true;
+        }
+    </script>
 </body>
 </html>
